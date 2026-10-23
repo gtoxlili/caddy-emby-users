@@ -24,7 +24,7 @@ const (
 	defaultUserAgent     = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 
-func (id identity) resolve(ctx context.Context, st *store.Store) (identity, error) {
+func (id identity) defaults() identity {
 	if id.Client == "" {
 		id.Client = "Emby Web"
 	}
@@ -37,16 +37,24 @@ func (id identity) resolve(ctx context.Context, st *store.Store) (identity, erro
 	if id.UserAgent == "" {
 		id.UserAgent = defaultUserAgent
 	}
+	return id
+}
+
+func (id identity) validate() error {
 	for name, value := range map[string]string{
 		"client_name": id.Client, "device_name": id.Device,
 		"device_id": id.DeviceID, "client_version": id.Version, "user_agent": id.UserAgent,
 	} {
 		for _, c := range value {
 			if c < 0x20 || c == 0x7f || (name != "user_agent" && (c == '"' || c == '\\')) {
-				return identity{}, fmt.Errorf("emby_users: invalid character in %s", name)
+				return fmt.Errorf("emby_users: invalid character in %s", name)
 			}
 		}
 	}
+	return nil
+}
+
+func (id identity) resolve(ctx context.Context, st *store.Store) (identity, error) {
 	if id.DeviceID == "" {
 		deviceID, err := st.Meta(ctx, "upstream_device_id")
 		if err != nil {

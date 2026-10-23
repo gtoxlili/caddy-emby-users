@@ -450,8 +450,8 @@ func TestCaddyfile(t *testing.T) {
 	want := Handler{Upstream: "https://emby.example.com", Username: "{env.EMBY_USERNAME}", Password: "{env.EMBY_PASSWORD}",
 		Database: "/data/emby-users.db", ClientName: "Emby", DeviceName: "Home", DeviceID: "gateway",
 		ClientVersion: "9.8.7", UserAgent: "ConfiguredPlayer/42"}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %+v", got)
+	if !reflect.DeepEqual(&got, &want) {
+		t.Errorf("got %+v", &got)
 	}
 	if err := new(Handler).UnmarshalCaddyfile(caddyfile.NewTestDispenser("emby_users {\n bogus x\n}")); err == nil {
 		t.Error("unknown option accepted")

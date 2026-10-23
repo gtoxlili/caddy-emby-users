@@ -137,3 +137,24 @@ func TestPlaybackReportAcceptsNowPlayingItem(t *testing.T) {
 		t.Fatalf("resume point: pos=%d played=%v", pos, played)
 	}
 }
+
+// Contract: bounded API rewriting fails before downstream headers are sent.
+// Malformed upstream JSON must not bypass local UserData isolation.
+func TestProxyRewriteBoundaries(t *testing.T) {
+	h := newHarness(t)
+	alice := h.signIn("alice")
+	h.up.reset()
+	r := h.as(alice.Token, "POST", "/emby/Items/e01EP1/PlaybackInfo", strings.Repeat("x", 1<<20+1))
+	if r.Status != http.StatusRequestEntityTooLarge || len(h.up.seen()) != 0 {
+		t.Fatalf("oversized API body: %d, %d upstream requests", r.Status, len(h.up.seen()))
+	}
+	for _, path := range []string{"/emby/Items/bad-json", "/emby/Videos/large/master.m3u8"} {
+		r = h.as(alice.Token, "GET", path, "")
+		if r.Status != http.StatusBadGateway {
+			t.Fatalf("%s: %d, want 502 before response commit", path, r.Status)
+		}
+		if strings.Contains(string(r.Body), h.up.currentToken()) || strings.Contains(string(r.Body), "UserData") {
+			t.Fatalf("%s exposed an unprocessed upstream body", path)
+		}
+	}
+}

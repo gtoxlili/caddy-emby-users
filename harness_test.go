@@ -1,6 +1,7 @@
 package embyusers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -32,6 +33,7 @@ const (
 
 type recorded struct {
 	Method, Path, Query string
+	Host                string
 	Header              http.Header
 	Body                string
 }
@@ -122,7 +124,7 @@ func (f *fakeUpstream) reset() {
 func (f *fakeUpstream) serve(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 	f.mu.Lock()
-	f.requests = append(f.requests, recorded{Method: r.Method, Path: r.URL.Path, Query: r.URL.RawQuery, Header: r.Header.Clone(), Body: string(body)})
+	f.requests = append(f.requests, recorded{Method: r.Method, Path: r.URL.Path, Query: r.URL.RawQuery, Host: r.Host, Header: r.Header.Clone(), Body: string(body)})
 	f.mu.Unlock()
 
 	path := strings.TrimPrefix(r.URL.Path, "/emby")
@@ -211,6 +213,12 @@ func (f *fakeUpstream) serve(w http.ResponseWriter, r *http.Request) {
 	case low == "/system/configuration", low == "/items/restricted":
 		// Admin-only on a real server; the shared account is not an admin.
 		http.Error(w, "Access token is invalid or expired.", http.StatusUnauthorized)
+	case low == "/items/bad-json":
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"UserData":{"Played":true},"token":"` + tok + `"`))
+	case low == "/videos/large/master.m3u8":
+		w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
+		w.Write([]byte(strings.Repeat("x", 16<<20+1)))
 	case strings.HasPrefix(low, "/displaypreferences/"):
 		writeFakeJSON(w, map[string]any{"Id": segs[1], "SortBy": "SortName", "CustomPrefs": map[string]any{}})
 	default:
@@ -244,11 +252,15 @@ func newHarness(t *testing.T) *harness {
 	}
 	t.Cleanup(func() { st.Close() })
 	base, _ := url.Parse(up.srv.URL)
-	a := newApp(st, newUpstream(base, "owner", upPassword, identity{
+	a := newApp(st, newUpstream(upstreamConfig{base: *base, username: "owner", password: upPassword, id: identity{
 		Client: "gateway", Device: "gateway", DeviceID: "test-device", Version: "9.8.7", UserAgent: "ConfiguredPlayer/42",
-	}, st, zap.NewNop()), zap.NewNop())
+	}}, st, zap.NewNop(), http.DefaultTransport), zap.NewNop())
 	rp := httputil.NewSingleHostReverseProxy(base)
+	rp.Transport = &upstreamTransport{base: a.up.hc.Transport}
 	next := caddyhttp.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+		if r.Context().Value(forwardKey{}) == nil {
+			r = r.WithContext(context.WithValue(r.Context(), forwardKey{}, &forwardCall{a: a, rc: &reqCtx{r: r}}))
+		}
 		rp.ServeHTTP(w, r)
 		return nil
 	})

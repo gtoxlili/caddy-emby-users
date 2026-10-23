@@ -14,21 +14,30 @@ import (
 	"github.com/gtoxlili/caddy-emby-users/internal/store"
 )
 
-// app is the runtime shared by every handler instance that uses one database.
+// app combines shared local state with one immutable upstream configuration.
 type app struct {
-	log      *zap.Logger
-	st       *store.Store
-	up       *upstream
-	sessions *sessionCache
-	limiter  *limiter
-	playing  *nowPlaying
+	*localState
+	log *zap.Logger
+	up  *upstream
+}
+
+// Only local state is shared across overlapping Caddy configurations.
+type localState struct {
+	st         *store.Store
+	sessions   *sessionCache
+	limiter    *limiter
+	playing    *nowPlaying
+	identityMu sync.Mutex
+	loginMu    sync.Mutex
 }
 
 func newApp(st *store.Store, up *upstream, log *zap.Logger) *app {
-	return &app{
-		log:      log,
+	return &app{localState: newLocalState(st), up: up, log: log}
+}
+
+func newLocalState(st *store.Store) *localState {
+	return &localState{
 		st:       st,
-		up:       up,
 		sessions: &sessionCache{m: map[string]*cachedSession{}},
 		limiter:  newLimiter(),
 		playing:  &nowPlaying{m: map[string]playingEntry{}},
@@ -36,7 +45,7 @@ func newApp(st *store.Store, up *upstream, log *zap.Logger) *app {
 }
 
 // Destruct closes the database when the last config using it goes away.
-func (a *app) Destruct() error { return a.st.Close() }
+func (s *localState) Destruct() error { return s.st.Close() }
 
 // reqCtx is one request as the plugin understands it.
 type reqCtx struct {
@@ -81,9 +90,7 @@ func (a *app) serve(w http.ResponseWriter, r *http.Request, next caddyhttp.Handl
 	rc.client = readClient(r, rc.q)
 
 	if r.Method == http.MethodOptions {
-		out := r.Clone(r.Context())
-		a.up.disguise(out, "")
-		return next.ServeHTTP(w, out)
+		return next.ServeHTTP(w, r)
 	}
 	if h := publicRoute(rc); h != nil {
 		return h(a, w, rc, next)
@@ -94,9 +101,7 @@ func (a *app) serve(w http.ResponseWriter, r *http.Request, next caddyhttp.Handl
 		}
 		// Public resources (images, branding) go through without a token;
 		// anything else the upstream server refuses on its own.
-		out := r.Clone(r.Context())
-		a.up.disguise(out, "")
-		return next.ServeHTTP(w, out)
+		return next.ServeHTTP(w, r)
 	}
 	sess, user, err := a.sessions.lookup(rc.ctx(), a.st, rc.client.Token)
 	if err != nil {
@@ -111,7 +116,7 @@ func (a *app) serve(w http.ResponseWriter, r *http.Request, next caddyhttp.Handl
 	if err := a.resolveOwner(rc); err != nil {
 		return err
 	}
-	a.sessions.touch(a.st, rc.client.Token, sess, clientIP(r))
+	a.sessions.touch(rc.ctx(), a.st, rc.client.Token, sess, clientIP(r))
 	return a.dispatch(w, rc, next)
 }
 
@@ -363,7 +368,7 @@ func (c *sessionCache) lookup(ctx context.Context, st *store.Store, token string
 }
 
 // touch records activity at most once a minute per session.
-func (c *sessionCache) touch(st *store.Store, token string, sess *store.Session, remote string) {
+func (c *sessionCache) touch(ctx context.Context, st *store.Store, token string, sess *store.Session, remote string) {
 	now := time.Now()
 	c.mu.Lock()
 	e := c.m[token]
@@ -375,7 +380,7 @@ func (c *sessionCache) touch(st *store.Store, token string, sess *store.Session,
 	if !due {
 		return
 	}
-	go st.TouchSession(context.Background(), token, now.UnixMilli(), remote)
+	st.TouchSession(ctx, token, now.UnixMilli(), remote)
 }
 
 // invalidate forgets every cached lookup after an account or session change.

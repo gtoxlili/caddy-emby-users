@@ -26,19 +26,16 @@ var errNotFound = errors.New("not found upstream")
 // request it makes, and every request it lets through, uses the one account
 // configured in the Caddyfile.
 type upstream struct {
-	base     *url.URL
-	hc       *http.Client
-	username string
-	password string
-	id       identity
-	log      *zap.Logger
-	st       *store.Store
+	cfg upstreamConfig
+	hc  *http.Client
+	log *zap.Logger
+	st  *store.Store
 
 	mu       sync.RWMutex
 	token    string
 	userID   string
 	serverID string
-	loginMu  sync.Mutex
+	loginMu  *sync.Mutex
 
 	items    *ttlCache[[]byte]
 	episodes *ttlCache[[]episode]
@@ -56,17 +53,18 @@ type episode struct {
 	RunTime  int64
 }
 
-func newUpstream(base *url.URL, username, password string, id identity, st *store.Store, log *zap.Logger) *upstream {
-	tr := http.DefaultTransport.(*http.Transport).Clone()
-	tr.ResponseHeaderTimeout = 30 * time.Second
+func newUpstream(cfg upstreamConfig, st *store.Store, log *zap.Logger, transport http.RoundTripper) *upstream {
 	return &upstream{
-		base:     base,
-		hc:       &http.Client{Transport: tr, Timeout: 60 * time.Second},
-		username: username,
-		password: password,
-		id:       id,
+		cfg: cfg,
+		hc: &http.Client{
+			Transport: transport,
+			Timeout:   60 * time.Second,
+			// API redirects must not carry the shared token to another origin.
+			CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+		},
 		log:      log,
 		st:       st,
+		loginMu:  new(sync.Mutex),
 		items:    newTTLCache[[]byte](2*time.Minute, 2000),
 		episodes: newTTLCache[[]episode](10*time.Minute, 1000),
 		members:  newTTLCache[map[string]bool](30*time.Minute, 50),
@@ -75,38 +73,11 @@ func newUpstream(base *url.URL, username, password string, id identity, st *stor
 	}
 }
 
-// configure applies the Caddyfile settings. Pointing the plugin at another
-// server or account drops the saved sign-in and every cached item.
-func (u *upstream) configure(base *url.URL, username, password string, id identity) {
-	u.loginMu.Lock()
-	defer u.loginMu.Unlock()
-	u.mu.Lock()
-	changed := u.base.String() != base.String() || u.username != username || u.password != password || u.id != id
-	u.base, u.username, u.password, u.id = base, username, password, id
-	if changed {
-		u.token, u.userID, u.serverID = "", "", ""
-	}
-	u.mu.Unlock()
-	if changed {
-		u.items.clear()
-		u.episodes.clear()
-		u.members.clear()
-		u.userDTO.clear()
-		u.info.clear()
-	}
-}
-
 type upstreamConfig struct {
 	base     url.URL
 	username string
 	password string
 	id       identity
-}
-
-func (u *upstream) config() upstreamConfig {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return upstreamConfig{base: *u.base, username: u.username, password: u.password, id: u.id}
 }
 
 // credentials returns the upstream token, user id and server id.
@@ -142,7 +113,7 @@ func (u *upstream) ensure(ctx context.Context) error {
 	}
 	if raw, err := u.st.Meta(ctx, "upstream"); err == nil && raw != "" {
 		var s savedLogin
-		cfg := u.config()
+		cfg := u.cfg
 		if json.Unmarshal([]byte(raw), &s) == nil && s.Account == cfg.account() && s.Identity == cfg.id && s.Token != "" {
 			u.set(s.Token, s.UserID, s.ServerID)
 			return nil
@@ -172,7 +143,17 @@ func (u *upstream) set(token, userID, serverID string) {
 // and in User-Agent; left alone, the upstream server would see one device
 // per friend behind the one account.
 func (u *upstream) disguise(r *http.Request, token string) {
-	id := u.config().id
+	r.URL.Scheme, r.URL.Host, r.Host = u.cfg.base.Scheme, u.cfg.base.Host, u.cfg.base.Host
+	// Applied at the wire, after reverse_proxy has generated forwarding headers.
+	for key := range r.Header {
+		if strings.HasPrefix(strings.ToLower(key), "x-forwarded-") {
+			r.Header.Del(key)
+		}
+	}
+	for _, key := range []string{"Forwarded", "Via", "X-Real-IP", "CF-Connecting-IP", "True-Client-IP"} {
+		r.Header.Del(key)
+	}
+	id := u.cfg.id
 	auth := id.authHeader(token)
 	r.Header.Set("X-Emby-Authorization", auth)
 	if embyAuthorization(r.Header.Get("Authorization")) {
@@ -210,7 +191,7 @@ func (u *upstream) disguise(r *http.Request, token string) {
 }
 
 func (u *upstream) loginLocked(ctx context.Context) error {
-	cfg := u.config()
+	cfg := u.cfg
 	body, _ := json.Marshal(map[string]string{"Username": cfg.username, "Pw": cfg.password})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.url("/Users/AuthenticateByName", nil), bytes.NewReader(body))
 	if err != nil {
@@ -251,7 +232,7 @@ func (u *upstream) loginLocked(ctx context.Context) error {
 // url builds an API URL. The plugin's own calls use the /emby prefix, which
 // every Emby server accepts.
 func (u *upstream) url(path string, q url.Values) string {
-	ref := u.config().base
+	ref := u.cfg.base
 	prefix := strings.TrimSuffix(ref.Path, "/")
 	if !strings.HasSuffix(strings.ToLower(prefix), "/emby") {
 		prefix += "/emby"
@@ -547,11 +528,5 @@ func (c *ttlCache[V]) set(k string, v V) {
 func (c *ttlCache[V]) del(k string) {
 	c.mu.Lock()
 	delete(c.m, k)
-	c.mu.Unlock()
-}
-
-func (c *ttlCache[V]) clear() {
-	c.mu.Lock()
-	c.m = map[string]ttlEntry[V]{}
 	c.mu.Unlock()
 }

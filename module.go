@@ -5,196 +5,157 @@
 package embyusers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"path/filepath"
-	"strings"
+	"sync"
 
 	"github.com/caddyserver/caddy/v2"
-	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
-
-	"github.com/gtoxlili/caddy-emby-users/internal/store"
+	"github.com/caddyserver/caddy/v2/modules/caddyhttp/reverseproxy"
+	"go.uber.org/zap"
 )
 
 func init() {
-	caddy.RegisterModule(Handler{})
+	caddy.RegisterModule(new(Handler))
 	httpcaddyfile.RegisterHandlerDirective("emby_users", parseCaddyfile)
-	httpcaddyfile.RegisterDirectiveOrder("emby_users", httpcaddyfile.Before, "reverse_proxy")
+	httpcaddyfile.RegisterDirectiveOrder("emby_users", httpcaddyfile.Before, "respond")
 }
 
-// Handler sits in front of a reverse_proxy to an Emby server.
+// Handler terminates the Emby route and delegates upstream I/O to Caddy's
+// reverse proxy. Its configuration is immutable after provisioning.
 type Handler struct {
-	// Upstream is the base URL of the Emby server, the same one the
-	// reverse_proxy after this handler points at.
-	Upstream string `json:"upstream"`
-	// Username and Password sign in to the upstream server. Placeholders
-	// such as {env.EMBY_PASSWORD} are expanded.
-	Username string `json:"username"`
-	Password string `json:"password"`
-	// Database is the SQLite file for accounts and play state. Defaults to
-	// emby-users.db in Caddy's data directory.
-	Database string `json:"database,omitempty"`
-	// The upstream identity is shared by all callers. Defaults describe
-	// Emby Web on Chrome, with a random device ID persisted in the database.
+	Upstream      string `json:"upstream"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	Database      string `json:"database,omitempty"`
 	ClientName    string `json:"client_name,omitempty"`
 	DeviceName    string `json:"device_name,omitempty"`
 	DeviceID      string `json:"device_id,omitempty"`
 	ClientVersion string `json:"client_version,omitempty"`
 	UserAgent     string `json:"user_agent,omitempty"`
+	// Transport is a standard Caddy reverse-proxy transport. Both internal
+	// API calls and proxied media use this same provisioned instance.
+	TransportRaw json.RawMessage `json:"transport,omitempty" caddy:"namespace=http.reverse_proxy.transport inline_key=protocol"`
 
-	app *app
-	key string
+	base      *url.URL
+	id        identity
+	transport http.RoundTripper
+	proxy     *reverseproxy.Handler
+	ctx       context.Context
+	cancel    context.CancelFunc
+	log       *zap.Logger
+
+	mu       sync.Mutex
+	active   sync.WaitGroup
+	closed   bool
+	app      *app
+	key      string
+	ready    chan struct{}
+	startErr error
 }
 
 // CaddyModule returns the Caddy module information.
-func (Handler) CaddyModule() caddy.ModuleInfo {
+func (*Handler) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
 		ID:  "http.handlers.emby_users",
 		New: func() caddy.Module { return new(Handler) },
 	}
 }
 
-// pool shares one runtime per database across config reloads, so a reload
-// keeps the session cache and the upstream sign-in.
+// The database and local session state survive overlapping configurations;
+// upstream clients and proxy transports belong to their own configuration.
 var pool = caddy.NewUsagePool()
 
-// defaultDatabase is where accounts live unless the config says otherwise.
 func defaultDatabase() string { return filepath.Join(caddy.AppDataDir(), "emby-users.db") }
 
-// Provision opens the database and prepares the upstream client.
 func (h *Handler) Provision(ctx caddy.Context) error {
 	repl := caddy.NewReplacer()
-	upstreamURL := repl.ReplaceAll(h.Upstream, "")
-	username := repl.ReplaceAll(h.Username, "")
-	password := repl.ReplaceAll(h.Password, "")
-	database := repl.ReplaceAll(h.Database, "")
-	if database == "" {
-		database = defaultDatabase()
+	for _, value := range []*string{&h.Upstream, &h.Username, &h.Password, &h.Database,
+		&h.ClientName, &h.DeviceName, &h.DeviceID, &h.ClientVersion, &h.UserAgent} {
+		*value = repl.ReplaceAll(*value, "")
 	}
-	id := identity{
-		Client: repl.ReplaceAll(h.ClientName, ""), Device: repl.ReplaceAll(h.DeviceName, ""),
-		DeviceID: repl.ReplaceAll(h.DeviceID, ""), Version: repl.ReplaceAll(h.ClientVersion, ""),
-		UserAgent: repl.ReplaceAll(h.UserAgent, ""),
+	if h.Database == "" {
+		h.Database = defaultDatabase()
 	}
-	base, err := url.Parse(upstreamURL)
-	if err != nil || base.Host == "" || (base.Scheme != "http" && base.Scheme != "https") {
-		return fmt.Errorf("emby_users: upstream must be an http(s) URL, got %q", upstreamURL)
+	var err error
+	h.Database, err = filepath.Abs(h.Database)
+	if err != nil {
+		return fmt.Errorf("emby_users: database path: %w", err)
 	}
-	if username == "" {
+	h.base, err = url.Parse(h.Upstream)
+	if err != nil {
+		return fmt.Errorf("emby_users: upstream: %w", err)
+	}
+	h.id = (identity{Client: h.ClientName, Device: h.DeviceName, DeviceID: h.DeviceID,
+		Version: h.ClientVersion, UserAgent: h.UserAgent}).defaults()
+	if err := h.Validate(); err != nil {
+		return err
+	}
+	if h.TransportRaw == nil {
+		h.TransportRaw = json.RawMessage(`{"protocol":"http","response_header_timeout":30000000000}`)
+	}
+	// Match reverse_proxy's HTTPS behavior before the transport is provisioned.
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(h.TransportRaw, &raw); err != nil {
+		return fmt.Errorf("emby_users: transport: %w", err)
+	}
+	if string(raw["protocol"]) == `"http"` && h.base.Scheme == "https" && raw["tls"] == nil {
+		raw["tls"] = json.RawMessage(`{}`)
+		h.TransportRaw, _ = json.Marshal(raw)
+	}
+	mod, err := ctx.LoadModule(h, "TransportRaw")
+	if err != nil {
+		return fmt.Errorf("emby_users: loading transport: %w", err)
+	}
+	h.transport = mod.(http.RoundTripper)
+	dial := h.base.Host
+	if h.base.Port() == "" {
+		port := "80"
+		if h.base.Scheme == "https" {
+			port = "443"
+		}
+		dial = net.JoinHostPort(h.base.Hostname(), port)
+	}
+	h.proxy = &reverseproxy.Handler{
+		Upstreams: reverseproxy.UpstreamPool{&reverseproxy.Upstream{Dial: dial}},
+		Transport: &upstreamTransport{base: h.transport},
+	}
+	if err := h.proxy.Provision(ctx); err != nil {
+		return fmt.Errorf("emby_users: provisioning reverse proxy: %w", err)
+	}
+	h.ctx, h.cancel = context.WithCancel(ctx)
+	h.log = ctx.Logger()
+	h.ready = make(chan struct{})
+	owner, err := ctx.App("emby_users")
+	if err != nil {
+		return fmt.Errorf("emby_users: loading lifecycle app: %w", err)
+	}
+	owner.(*App).handlers = append(owner.(*App).handlers, h)
+	return nil
+}
+
+// Validate is read-only. In particular, caddy validate must not create or
+// migrate the account database, generate a device ID, or authenticate upstream.
+func (h *Handler) Validate() error {
+	if h.base == nil || h.base.Hostname() == "" || (h.base.Scheme != "http" && h.base.Scheme != "https") ||
+		(h.base.Path != "" && h.base.Path != "/") || h.base.User != nil || h.base.RawQuery != "" || h.base.Fragment != "" {
+		return fmt.Errorf("emby_users: upstream must be an http(s) origin without credentials, path, query or fragment")
+	}
+	if h.Username == "" {
 		return fmt.Errorf("emby_users: username is required")
 	}
-	log := ctx.Logger()
-	val, _, err := pool.LoadOrNew(database, func() (caddy.Destructor, error) {
-		st, err := store.Open(database)
-		if err != nil {
-			return nil, fmt.Errorf("emby_users: opening %s: %w", database, err)
-		}
-		resolved, err := id.resolve(ctx, st)
-		if err != nil {
-			st.Close()
-			return nil, err
-		}
-		return newApp(st, newUpstream(base, username, password, resolved, st, log), log), nil
-	})
-	if err != nil {
-		return err
-	}
-	a := val.(*app)
-	id, err = id.resolve(ctx, a.st)
-	if err != nil {
-		pool.Delete(database)
-		return err
-	}
-	// A reload may change the upstream account; the shared runtime follows.
-	a.up.configure(base, username, password, id)
-	h.key = database
-	h.app = a
-	return nil
-}
-
-// Cleanup releases the shared runtime when no config uses it.
-func (h *Handler) Cleanup() error {
-	if h.key == "" {
-		return nil
-	}
-	_, err := pool.Delete(h.key)
-	h.key = ""
-	return err
-}
-
-// ServeHTTP implements caddyhttp.MiddlewareHandler.
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
-	return h.app.serve(w, r, next)
-}
-
-// UnmarshalCaddyfile parses
-//
-//	emby_users {
-//		upstream <url>
-//		username <name>
-//		password <password>
-//		database <path>
-//		client_name <name>
-//		device_name <name>
-//		device_id <id>
-//		client_version <version>
-//		user_agent <value>
-//	}
-func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	d.Next()
-	if d.NextArg() {
-		h.Upstream = d.Val()
-	}
-	if d.NextArg() {
-		return d.ArgErr()
-	}
-	for d.NextBlock(0) {
-		key := d.Val()
-		if !d.NextArg() {
-			return d.ArgErr()
-		}
-		val := d.Val()
-		if d.NextArg() {
-			return d.ArgErr()
-		}
-		switch strings.ToLower(key) {
-		case "upstream":
-			h.Upstream = val
-		case "username":
-			h.Username = val
-		case "password":
-			h.Password = val
-		case "database":
-			h.Database = val
-		case "client_name":
-			h.ClientName = val
-		case "device_name":
-			h.DeviceName = val
-		case "device_id":
-			h.DeviceID = val
-		case "client_version":
-			h.ClientVersion = val
-		case "user_agent":
-			h.UserAgent = val
-		default:
-			return d.Errf("unknown emby_users option %q", key)
-		}
-	}
-	return nil
-}
-
-func parseCaddyfile(hh httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
-	var h Handler
-	err := h.UnmarshalCaddyfile(hh.Dispenser)
-	return &h, err
+	return h.id.validate()
 }
 
 var (
+	_ caddy.Validator             = (*Handler)(nil)
 	_ caddy.Provisioner           = (*Handler)(nil)
 	_ caddy.CleanerUpper          = (*Handler)(nil)
 	_ caddyhttp.MiddlewareHandler = (*Handler)(nil)
-	_ caddyfile.Unmarshaler       = (*Handler)(nil)
 )

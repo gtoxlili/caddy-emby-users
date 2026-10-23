@@ -153,6 +153,8 @@ func (a *app) websocket(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) 
 		return writeText(w, http.StatusBadRequest, "WebSocket is not available on this connection.")
 	}
 	defer conn.Close()
+	stop := context.AfterFunc(rc.ctx(), func() { conn.Close() })
+	defer stop()
 	sum := sha1.Sum([]byte(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
 	fmt.Fprintf(brw, "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n",
 		base64.StdEncoding.EncodeToString(sum[:]))
