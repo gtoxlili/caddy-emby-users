@@ -45,15 +45,6 @@ type upstream struct {
 	members  *ttlCache[map[string]bool]
 	userDTO  *ttlCache[[]byte]
 	info     *ttlCache[[]byte]
-	valid    *ttlCache[bool]
-}
-
-// identity is how the upstream server sees the plugin: one client on one
-// device, whoever is watching.
-type identity struct {
-	Client   string
-	Device   string
-	DeviceID string
 }
 
 // episode is the slice of an Episode the plugin needs to find the next one.
@@ -79,7 +70,6 @@ func newUpstream(base *url.URL, username, password string, id identity, st *stor
 		items:    newTTLCache[[]byte](2*time.Minute, 2000),
 		episodes: newTTLCache[[]episode](10*time.Minute, 1000),
 		members:  newTTLCache[map[string]bool](30*time.Minute, 50),
-		valid:    newTTLCache[bool](time.Minute, 4),
 		userDTO:  newTTLCache[[]byte](10*time.Minute, 1),
 		info:     newTTLCache[[]byte](time.Minute, 2),
 	}
@@ -88,6 +78,8 @@ func newUpstream(base *url.URL, username, password string, id identity, st *stor
 // configure applies the Caddyfile settings. Pointing the plugin at another
 // server or account drops the saved sign-in and every cached item.
 func (u *upstream) configure(base *url.URL, username, password string, id identity) {
+	u.loginMu.Lock()
+	defer u.loginMu.Unlock()
 	u.mu.Lock()
 	changed := u.base.String() != base.String() || u.username != username || u.password != password || u.id != id
 	u.base, u.username, u.password, u.id = base, username, password, id
@@ -129,10 +121,11 @@ func (u *upstream) credentials() (token, userID, serverID string) {
 func (c upstreamConfig) account() string { return c.username + "@" + c.base.String() }
 
 type savedLogin struct {
-	Account  string `json:"account"`
-	Token    string `json:"token"`
-	UserID   string `json:"user_id"`
-	ServerID string `json:"server_id"`
+	Account  string   `json:"account"`
+	Identity identity `json:"identity"`
+	Token    string   `json:"token"`
+	UserID   string   `json:"user_id"`
+	ServerID string   `json:"server_id"`
 }
 
 // ensure makes sure there is an upstream token. A token saved by an earlier
@@ -149,7 +142,8 @@ func (u *upstream) ensure(ctx context.Context) error {
 	}
 	if raw, err := u.st.Meta(ctx, "upstream"); err == nil && raw != "" {
 		var s savedLogin
-		if json.Unmarshal([]byte(raw), &s) == nil && s.Account == u.config().account() && s.Token != "" {
+		cfg := u.config()
+		if json.Unmarshal([]byte(raw), &s) == nil && s.Account == cfg.account() && s.Identity == cfg.id && s.Token != "" {
 			u.set(s.Token, s.UserID, s.ServerID)
 			return nil
 		}
@@ -173,33 +167,35 @@ func (u *upstream) set(token, userID, serverID string) {
 	u.mu.Unlock()
 }
 
-func (u *upstream) authHeader() string {
-	id := u.config().id
-	return fmt.Sprintf(`MediaBrowser Client="%s", Device="%s", DeviceId="%s", Version="%s"`, id.Client, id.Device, id.DeviceID, version)
-}
-
-func (u *upstream) userAgent() string { return u.config().id.Client + "/" + version }
-
 // disguise makes a request look like it comes from the plugin's own device.
 // Clients name themselves in the authorization header, in query parameters
 // and in User-Agent; left alone, the upstream server would see one device
 // per friend behind the one account.
 func (u *upstream) disguise(r *http.Request, token string) {
 	id := u.config().id
-	auth := u.authHeader()
-	if token != "" {
-		auth += `, Token="` + token + `"`
-	}
+	auth := id.authHeader(token)
 	r.Header.Set("X-Emby-Authorization", auth)
-	if lower := strings.ToLower(r.Header.Get("Authorization")); strings.HasPrefix(lower, "emby ") || strings.HasPrefix(lower, "mediabrowser ") {
+	if embyAuthorization(r.Header.Get("Authorization")) {
 		r.Header.Del("Authorization")
 	}
-	for _, h := range []string{"X-Emby-Client", "X-Emby-Device-Name", "X-Emby-Device-Id", "X-Emby-Client-Version"} {
+	for _, h := range []string{"X-Emby-Client", "X-Emby-Device-Name", "X-Emby-Device-Id", "X-Emby-Client-Version", "X-MediaBrowser-Authorization", "X-Requested-With"} {
 		r.Header.Del(h)
 	}
-	r.Header.Set("User-Agent", u.userAgent())
+	// Browser client hints would otherwise contradict the fixed User-Agent.
+	for h := range r.Header {
+		if strings.HasPrefix(strings.ToLower(h), "sec-ch-ua") {
+			r.Header.Del(h)
+		}
+	}
+	r.Header.Set("User-Agent", id.UserAgent)
 	r.URL.RawQuery = editQuery(r.URL.RawQuery, func(k, v string) (string, bool, bool) {
 		switch strings.ToLower(k) {
+		case "x-emby-authorization", "x-mediabrowser-authorization":
+			return auth, true, true
+		case "authorization":
+			if embyAuthorization(v) {
+				return auth, true, true
+			}
 		case "x-emby-client":
 			return id.Client, true, true
 		case "x-emby-device-name":
@@ -207,7 +203,7 @@ func (u *upstream) disguise(r *http.Request, token string) {
 		case "x-emby-device-id", "deviceid":
 			return id.DeviceID, true, true
 		case "x-emby-client-version":
-			return version, true, true
+			return id.Version, true, true
 		}
 		return v, false, true
 	})
@@ -221,8 +217,7 @@ func (u *upstream) loginLocked(ctx context.Context) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Emby-Authorization", u.authHeader())
-	req.Header.Set("User-Agent", u.userAgent())
+	u.disguise(req, "")
 	resp, err := u.hc.Do(req)
 	if err != nil {
 		return fmt.Errorf("upstream sign-in: %w", err)
@@ -245,7 +240,7 @@ func (u *upstream) loginLocked(ctx context.Context) error {
 		return errors.New("upstream sign-in: response has no token")
 	}
 	u.set(res.AccessToken, res.User.ID, res.ServerID)
-	saved, _ := json.Marshal(savedLogin{Account: cfg.account(), Token: res.AccessToken, UserID: res.User.ID, ServerID: res.ServerID})
+	saved, _ := json.Marshal(savedLogin{Account: cfg.account(), Identity: cfg.id, Token: res.AccessToken, UserID: res.User.ID, ServerID: res.ServerID})
 	if err := u.st.SetMeta(ctx, "upstream", string(saved)); err != nil {
 		u.log.Warn("saving upstream token", zap.Error(err))
 	}
@@ -283,8 +278,7 @@ func (u *upstream) do(ctx context.Context, method, path string, q url.Values, bo
 			return nil, err
 		}
 		req.Header.Set("X-Emby-Token", tok)
-		req.Header.Set("X-Emby-Authorization", u.authHeader()+`, Token="`+tok+`"`)
-		req.Header.Set("User-Agent", u.userAgent())
+		u.disguise(req, tok)
 		if body != nil {
 			req.Header.Set("Content-Type", "application/json")
 		}
@@ -305,27 +299,19 @@ func (u *upstream) do(ctx context.Context, method, path string, q url.Values, bo
 // tokenValid reports whether the upstream server still accepts tok, by
 // asking for the account itself.
 func (u *upstream) tokenValid(ctx context.Context, tok string) bool {
-	if ok, cached := u.valid.get(tok); cached {
-		return ok
-	}
 	_, uid, _ := u.credentials()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.url("/Users/"+uid, nil), nil)
 	if err != nil {
 		return false
 	}
 	req.Header.Set("X-Emby-Token", tok)
-	req.Header.Set("X-Emby-Authorization", u.authHeader())
-	req.Header.Set("User-Agent", u.userAgent())
+	u.disguise(req, tok)
 	resp, err := u.hc.Do(req)
 	if err != nil {
 		return false
 	}
 	resp.Body.Close()
-	ok := resp.StatusCode == http.StatusOK
-	if ok {
-		u.valid.set(tok, true)
-	}
-	return ok
+	return resp.StatusCode == http.StatusOK
 }
 
 // get fetches a JSON document.

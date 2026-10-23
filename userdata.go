@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
@@ -101,6 +102,16 @@ func (a *app) report(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) err
 	}
 	f := fields("application/json", readBody(rc.r))
 	itemID := bodyString(f, "itemid")
+	if itemID == "" {
+		if item, ok := f["nowplayingitem"].(map[string]any); ok {
+			for key, value := range item {
+				if strings.EqualFold(key, "Id") {
+					itemID, _ = value.(string)
+					break
+				}
+			}
+		}
+	}
 	if itemID == "" {
 		return noContent(w)
 	}

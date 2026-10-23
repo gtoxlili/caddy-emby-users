@@ -81,7 +81,9 @@ func (a *app) serve(w http.ResponseWriter, r *http.Request, next caddyhttp.Handl
 	rc.client = readClient(r, rc.q)
 
 	if r.Method == http.MethodOptions {
-		return next.ServeHTTP(w, r)
+		out := r.Clone(r.Context())
+		a.up.disguise(out, "")
+		return next.ServeHTTP(w, out)
 	}
 	if h := publicRoute(rc); h != nil {
 		return h(a, w, rc, next)
@@ -120,6 +122,9 @@ func (a *app) resolveOwner(rc *reqCtx) error {
 		return nil
 	}
 	id := pathUserID(rc.segs)
+	if id == "" {
+		id = queryGet(rc.q, "UserId")
+	}
 	if id == "" || strings.EqualFold(id, rc.user.ID) {
 		return nil
 	}
@@ -185,6 +190,9 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 	case get && match(s, "system/info"):
 		h = (*app).systemInfo
 	case get && match(s, "system/activitylog/entries"):
+		if !rc.user.Admin {
+			return writeText(w, http.StatusForbidden, textForbidden)
+		}
 		h = (*app).emptyResult
 
 	// Accounts.
@@ -263,6 +271,9 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 	if h != nil {
 		return h(a, w, rc, next)
 	}
+	if upstreamManagement(s) {
+		return writeText(w, http.StatusForbidden, textForbidden)
+	}
 	if len(s) > 0 && (s[0] == "users" || s[0] == "sessions") && !get && !forwardable(m, s) {
 		// Every other write under /Users and /Sessions targets the shared
 		// upstream account or another client's session. Accept and drop it.
@@ -272,6 +283,24 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 		return writeText(w, http.StatusForbidden, textForbidden)
 	}
 	return a.proxy(w, rc, next, nil)
+}
+
+// Local administrators may manage friends' accounts, but must not inherit
+// access to the shared upstream server's configuration, keys or filesystem.
+func upstreamManagement(s []string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	switch s[0] {
+	case "system", "auth", "environment", "scheduledtasks", "packages", "serverconfiguration":
+		return true
+	case "plugins":
+		// Clients consult this endpoint for playback licensing.
+		return !match(s, "plugins/securityinfo")
+	case "library":
+		return len(s) > 1 && (s[1] == "virtualfolders" || s[1] == "selectablemediafolders")
+	}
+	return false
 }
 
 // forwardable lists the writes that may reach the upstream server: they

@@ -212,11 +212,12 @@ func (a *app) effectiveConfiguration(ctx context.Context, u *store.User) (*jsonx
 
 // userFilters are the parts of an item query that depend on play state.
 type userFilters struct {
-	favorite  *bool
-	likes     *bool
-	resumable bool
-	played    *bool
-	byHistory bool
+	favorite        *bool
+	favoriteOrLikes bool
+	likes           *bool
+	resumable       bool
+	played          *bool
+	byHistory       bool
 }
 
 func parseUserFilters(rc *reqCtx) userFilters {
@@ -224,8 +225,10 @@ func parseUserFilters(rc *reqCtx) userFilters {
 	t, ff := true, false
 	for _, v := range queryList(rc.q, "Filters") {
 		switch v {
-		case "isfavorite", "isfavoriteorlikes":
+		case "isfavorite":
 			f.favorite = &t
+		case "isfavoriteorlikes":
+			f.favoriteOrLikes = true
 		case "likes":
 			f.likes = &t
 		case "dislikes":
@@ -255,7 +258,7 @@ func parseUserFilters(rc *reqCtx) userFilters {
 // selective means the result is a subset of the user's own history, so it
 // can be built from local state.
 func (f userFilters) selective() bool {
-	return (f.favorite != nil && *f.favorite) || (f.likes != nil) || f.resumable ||
+	return f.favoriteOrLikes || (f.favorite != nil && *f.favorite) || (f.likes != nil) || f.resumable ||
 		(f.played != nil && *f.played) || f.byHistory
 }
 
@@ -272,6 +275,9 @@ func (f userFilters) keep(o *jsonx.Object) bool {
 		return false
 	}
 	if f.favorite != nil && ud.Bool("IsFavorite") != *f.favorite {
+		return false
+	}
+	if f.favoriteOrLikes && !ud.Bool("IsFavorite") && !ud.Bool("Likes") {
 		return false
 	}
 	if f.likes != nil {
@@ -311,7 +317,26 @@ func (a *app) items(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler) e
 		}
 		return a.collect(w, rc, ids, opts)
 	case f.excluding():
-		return a.proxy(w, rc, next, func(_ context.Context, _ *reqCtx, doc any) (any, error) {
+		upRC := *rc
+		upRC.r = rc.r.Clone(rc.ctx())
+		upRC.r.URL.RawQuery = editQuery(rc.r.URL.RawQuery, func(k, v string) (string, bool, bool) {
+			switch strings.ToLower(k) {
+			case "isplayed", "isfavorite":
+				return "", true, false
+			case "filters":
+				var kept []string
+				for _, filter := range strings.Split(v, ",") {
+					switch strings.ToLower(strings.TrimSpace(filter)) {
+					case "isplayed", "isunplayed", "isfavorite", "isfavoriteorlikes", "isresumable", "likes", "dislikes":
+					default:
+						kept = append(kept, filter)
+					}
+				}
+				return strings.Join(kept, ","), true, len(kept) > 0
+			}
+			return v, false, true
+		})
+		return a.proxy(w, &upRC, next, func(_ context.Context, _ *reqCtx, doc any) (any, error) {
 			return dropItems(doc, f.keep), nil
 		})
 	}
@@ -347,6 +372,14 @@ func (a *app) candidates(ctx context.Context, owner string, f userFilters) ([]st
 	var rows []store.ItemState
 	var err error
 	switch {
+	case f.favoriteOrLikes:
+		rows, err = a.st.Favorites(ctx, owner, maxCandidates)
+		if err == nil {
+			var liked []store.ItemState
+			liked, err = a.st.Rated(ctx, owner, true, maxCandidates)
+			rows = append(rows, liked...)
+			sort.SliceStable(rows, func(i, j int) bool { return rows[i].Updated > rows[j].Updated })
+		}
 	case f.favorite != nil && *f.favorite:
 		rows, err = a.st.Favorites(ctx, owner, maxCandidates)
 	case f.likes != nil:
@@ -515,7 +548,7 @@ func (a *app) collect(w http.ResponseWriter, rc *reqCtx, ids []string, o options
 }
 
 func (f userFilters) any() bool {
-	return f.favorite != nil || f.likes != nil || f.resumable || f.played != nil
+	return f.favorite != nil || f.favoriteOrLikes || f.likes != nil || f.resumable || f.played != nil
 }
 
 func (a *app) writeList(w http.ResponseWriter, rc *reqCtx, items []*jsonx.Object, total int) error {

@@ -43,8 +43,9 @@ func (a *app) proxy(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler, p
 		}
 		out := r.Clone(r.Context())
 		if body != nil {
-			out.Body = io.NopCloser(bytes.NewReader(body))
-			out.ContentLength = int64(len(body))
+			rewritten := swapBodyIdentity(body, uid, a.up.config().id.DeviceID)
+			out.Body = io.NopCloser(bytes.NewReader(rewritten))
+			out.ContentLength = int64(len(rewritten))
 		}
 		swapCredentials(out, tok, uid)
 		a.up.disguise(out, tok)
@@ -93,6 +94,36 @@ func (a *app) proxy(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler, p
 	// A valid local session never answers 401: clients drop the user back to
 	// the sign-in screen on it, and signing in again would not help.
 	return writeText(w, http.StatusBadGateway, "Upstream rejected the configured account.")
+}
+
+// PlaybackInfo and live-stream requests may also name the user and device
+// in their JSON body. Keep codec profiles and all other playback options.
+func swapBodyIdentity(body []byte, userID, deviceID string) []byte {
+	v, err := jsonx.Decode(body)
+	if err != nil {
+		return body
+	}
+	o, ok := v.(*jsonx.Object)
+	if !ok {
+		return body
+	}
+	changed := false
+	for _, key := range o.Keys() {
+		switch strings.ToLower(key) {
+		case "userid":
+			o.Set(key, userID)
+			changed = true
+		case "deviceid":
+			o.Set(key, deviceID)
+			changed = true
+		}
+	}
+	if changed {
+		if out, err := jsonx.Encode(o); err == nil {
+			return out
+		}
+	}
+	return body
 }
 
 func isMedia(segs []string) bool {

@@ -277,6 +277,10 @@ func TestHistoryFilters(t *testing.T) {
 	if ids := itemIDs(t, h.as(alice.Token, "GET", base+"&Filters=IsFavorite", "")); !reflect.DeepEqual(ids, []string{"m01MOVIE"}) {
 		t.Errorf("favorites = %v", ids)
 	}
+	h.as(alice.Token, "POST", "/emby/Users/"+alice.UserID+"/Items/e01EP2/Rating?Likes=true", "")
+	if ids := itemIDs(t, h.as(alice.Token, "GET", base+"&Filters=IsFavoriteOrLikes&SortBy=SortName", "")); !reflect.DeepEqual(ids, []string{"e01EP2", "m01MOVIE"}) {
+		t.Errorf("favorites or likes = %v", ids)
+	}
 	if ids := itemIDs(t, h.as(alice.Token, "GET", base+"&Filters=IsFavorite&ParentId=c01SHOWS", "")); len(ids) != 0 {
 		t.Errorf("favorites in the shows library = %v", ids)
 	}
@@ -358,6 +362,9 @@ func TestUpstreamTokenLoss(t *testing.T) {
 	h := newHarness(t)
 	alice := h.signIn("alice")
 	views := "/emby/Users/" + alice.UserID + "/Views"
+	if r := h.as(alice.Token, "GET", "/emby/Items/restricted", ""); r.Status != http.StatusForbidden {
+		t.Fatalf("restricted item: %d %s", r.Status, r.Body)
+	}
 	h.up.revoke()
 	if r := h.as(alice.Token, "GET", views, ""); r.Status != http.StatusOK {
 		t.Fatalf("after the upstream token was revoked: %d %s", r.Status, r.Body)
@@ -433,13 +440,16 @@ func TestCaddyfile(t *testing.T) {
 		client_name Emby
 		device_name Home
 		device_id gateway
+		client_version 9.8.7
+		user_agent "ConfiguredPlayer/42"
 	}`)
 	var got Handler
 	if err := got.UnmarshalCaddyfile(d); err != nil {
 		t.Fatal(err)
 	}
 	want := Handler{Upstream: "https://emby.example.com", Username: "{env.EMBY_USERNAME}", Password: "{env.EMBY_PASSWORD}",
-		Database: "/data/emby-users.db", ClientName: "Emby", DeviceName: "Home", DeviceID: "gateway"}
+		Database: "/data/emby-users.db", ClientName: "Emby", DeviceName: "Home", DeviceID: "gateway",
+		ClientVersion: "9.8.7", UserAgent: "ConfiguredPlayer/42"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v", got)
 	}
@@ -507,18 +517,17 @@ func TestOneSessionPerDevice(t *testing.T) {
 	}
 }
 
-// Some servers answer 401 to a valid token for pages the account may not
-// see. The official app's Manage Server screen polls such pages; each one
-// must not cost an upstream sign-in.
-func TestForbiddenUpstreamPagesDoNotSignInAgain(t *testing.T) {
+// Some servers answer 401 to a valid token for items the account may not
+// see. Repeated requests must not cost an upstream sign-in.
+func TestForbiddenUpstreamItemsDoNotSignInAgain(t *testing.T) {
 	h := newHarness(t)
 	alice := h.signIn("alice")
 	h.up.mu.Lock()
 	before := h.up.logins
 	h.up.mu.Unlock()
 	for i := 0; i < 3; i++ {
-		if r := h.as(alice.Token, "GET", "/emby/System/Configuration", ""); r.Status != http.StatusForbidden {
-			t.Fatalf("admin page: %d %s", r.Status, r.Body)
+		if r := h.as(alice.Token, "GET", "/emby/Items/restricted", ""); r.Status != http.StatusForbidden {
+			t.Fatalf("restricted item: %d %s", r.Status, r.Body)
 		}
 	}
 	h.up.mu.Lock()
@@ -534,30 +543,48 @@ func TestForbiddenUpstreamPagesDoNotSignInAgain(t *testing.T) {
 func TestUpstreamSeesOneDevice(t *testing.T) {
 	h := newHarness(t)
 	alice := h.signIn("alice")
-	h.up.reset()
+	bob := h.signIn("bob")
+	friendAuth := `Emby UserId="", Client="Infuse", Device="Alice's iPad", DeviceId="ipad-of-alice", Version="7.8", Token="` + alice.Token + `"`
 	friend := []string{
 		"User-Agent", "Infuse-Direct/7.8",
-		"X-Emby-Authorization", `Emby UserId="", Client="Infuse", Device="Alice's iPad", DeviceId="ipad-of-alice", Version="7.8", Token="` + alice.Token + `"`,
+		"X-Emby-Authorization", friendAuth,
+		"Authorization", friendAuth,
+		"X-MediaBrowser-Authorization", friendAuth,
 		"X-Emby-Device-Name", "Alice's iPad",
+		"X-Requested-With", "com.mb.android",
+		"Sec-CH-UA-Platform", `"iOS"`,
+		"Sec-CH-UA-Mobile", "?1",
 	}
-	h.do("GET", "/emby/Users/"+alice.UserID+"/Views?X-Emby-Client=Infuse&X-Emby-Device-Id=ipad-of-alice&DeviceId=ipad-of-alice", "", friend...)
+	h.do("GET", "/emby/Users/"+alice.UserID+"/Views?X-Emby-Client=Infuse&X-Emby-Device-Id=ipad-of-alice&DeviceId=ipad-of-alice&deviceid=ipad-of-alice&X-Emby-Client-Version=7.8&X-Emby-Authorization="+url.QueryEscape(friendAuth)+"&Authorization="+url.QueryEscape(friendAuth), "", friend...)
 	h.do("GET", "/emby/Items/e01EP1/Images/Primary?X-Emby-Device-Id=ipad-of-alice", "", "User-Agent", "Infuse-Direct/7.8")
 	h.do("GET", "/play/video/e01EP1?api_key="+alice.Token+"&DeviceId=ipad-of-alice", "", "User-Agent", "Infuse-Direct/7.8")
+	h.do("OPTIONS", "/emby/Items/e01EP1?X-Emby-Client=Infuse", "", friend...)
+	h.do("GET", "/emby/Users/"+bob.UserID+"/Views?DeviceId=bob-tv", "", "X-Emby-Token", bob.Token, "User-Agent", "SenPlayer/6")
+	// Exercise both the token probe and the reauthentication paths.
+	h.up.revoke()
+	if r := h.as(alice.Token, "GET", "/emby/Users/"+alice.UserID+"/Views", ""); r.Status != http.StatusOK {
+		t.Fatalf("request after token revocation: %d %s", r.Status, r.Body)
+	}
+	h.as(alice.Token, "GET", "/emby/Items/restricted", "")
 	reqs := h.up.seen()
 	if len(reqs) < 3 {
 		t.Fatalf("upstream saw %d requests", len(reqs))
 	}
 	for _, req := range reqs {
-		all := fmt.Sprint(req.Header) + req.Query
-		for _, leak := range []string{"ipad-of-alice", "Alice", "Infuse"} {
+		query, err := url.QueryUnescape(req.Query)
+		if err != nil {
+			t.Fatal(err)
+		}
+		all := fmt.Sprint(req.Header) + query
+		for _, leak := range []string{"ipad-of-alice", "Alice", "Infuse", "bob-tv", "SenPlayer", "com.mb.android", "iOS"} {
 			if strings.Contains(all, leak) {
 				t.Errorf("%s %s carries %q: %s", req.Method, req.Path, leak, all)
 			}
 		}
-		if ua := req.Header.Get("User-Agent"); ua != "gateway/"+version {
+		if ua := req.Header.Get("User-Agent"); ua != "ConfiguredPlayer/42" {
 			t.Errorf("%s: User-Agent %q", req.Path, ua)
 		}
-		if a := req.Header.Get("X-Emby-Authorization"); !strings.Contains(a, `DeviceId="test-device"`) {
+		if a := req.Header.Get("X-Emby-Authorization"); !strings.HasPrefix(a, `MediaBrowser Client="gateway", Device="gateway", DeviceId="test-device", Version="9.8.7"`) {
 			t.Errorf("%s: X-Emby-Authorization %q", req.Path, a)
 		}
 	}

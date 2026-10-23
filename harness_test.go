@@ -208,7 +208,7 @@ func (f *fakeUpstream) serve(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("video-bytes-" + segs[2]))
 	case strings.HasPrefix(low, "/sessions/playing"):
 		w.WriteHeader(http.StatusNoContent)
-	case low == "/system/configuration":
+	case low == "/system/configuration", low == "/items/restricted":
 		// Admin-only on a real server; the shared account is not an admin.
 		http.Error(w, "Access token is invalid or expired.", http.StatusUnauthorized)
 	case strings.HasPrefix(low, "/displaypreferences/"):
@@ -244,7 +244,9 @@ func newHarness(t *testing.T) *harness {
 	}
 	t.Cleanup(func() { st.Close() })
 	base, _ := url.Parse(up.srv.URL)
-	a := newApp(st, newUpstream(base, "owner", upPassword, identity{Client: "gateway", Device: "gateway", DeviceID: "test-device"}, st, zap.NewNop()), zap.NewNop())
+	a := newApp(st, newUpstream(base, "owner", upPassword, identity{
+		Client: "gateway", Device: "gateway", DeviceID: "test-device", Version: "9.8.7", UserAgent: "ConfiguredPlayer/42",
+	}, st, zap.NewNop()), zap.NewNop())
 	rp := httputil.NewSingleHostReverseProxy(base)
 	next := caddyhttp.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 		rp.ServeHTTP(w, r)

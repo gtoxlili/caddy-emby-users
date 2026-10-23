@@ -19,9 +19,6 @@ import (
 	"github.com/gtoxlili/caddy-emby-users/internal/store"
 )
 
-// version is reported to the upstream server as the client version.
-const version = "0.1.0"
-
 func init() {
 	caddy.RegisterModule(Handler{})
 	httpcaddyfile.RegisterHandlerDirective("emby_users", parseCaddyfile)
@@ -40,12 +37,13 @@ type Handler struct {
 	// Database is the SQLite file for accounts and play state. Defaults to
 	// emby-users.db in Caddy's data directory.
 	Database string `json:"database,omitempty"`
-	// ClientName, DeviceName and DeviceID are what the upstream server sees
-	// on every request, whoever makes it. They default to
-	// "caddy-emby-users".
-	ClientName string `json:"client_name,omitempty"`
-	DeviceName string `json:"device_name,omitempty"`
-	DeviceID   string `json:"device_id,omitempty"`
+	// The upstream identity is shared by all callers. Defaults describe
+	// Emby Web on Chrome, with a random device ID persisted in the database.
+	ClientName    string `json:"client_name,omitempty"`
+	DeviceName    string `json:"device_name,omitempty"`
+	DeviceID      string `json:"device_id,omitempty"`
+	ClientVersion string `json:"client_version,omitempty"`
+	UserAgent     string `json:"user_agent,omitempty"`
 
 	app *app
 	key string
@@ -76,11 +74,10 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 	if database == "" {
 		database = defaultDatabase()
 	}
-	id := identity{Client: h.ClientName, Device: h.DeviceName, DeviceID: h.DeviceID}
-	for _, f := range []*string{&id.Client, &id.Device, &id.DeviceID} {
-		if *f == "" {
-			*f = "caddy-emby-users"
-		}
+	id := identity{
+		Client: repl.ReplaceAll(h.ClientName, ""), Device: repl.ReplaceAll(h.DeviceName, ""),
+		DeviceID: repl.ReplaceAll(h.DeviceID, ""), Version: repl.ReplaceAll(h.ClientVersion, ""),
+		UserAgent: repl.ReplaceAll(h.UserAgent, ""),
 	}
 	base, err := url.Parse(upstreamURL)
 	if err != nil || base.Host == "" || (base.Scheme != "http" && base.Scheme != "https") {
@@ -89,21 +86,31 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 	if username == "" {
 		return fmt.Errorf("emby_users: username is required")
 	}
-	h.key = database
 	log := ctx.Logger()
-	val, _, err := pool.LoadOrNew(h.key, func() (caddy.Destructor, error) {
+	val, _, err := pool.LoadOrNew(database, func() (caddy.Destructor, error) {
 		st, err := store.Open(database)
 		if err != nil {
 			return nil, fmt.Errorf("emby_users: opening %s: %w", database, err)
 		}
-		return newApp(st, newUpstream(base, username, password, id, st, log), log), nil
+		resolved, err := id.resolve(ctx, st)
+		if err != nil {
+			st.Close()
+			return nil, err
+		}
+		return newApp(st, newUpstream(base, username, password, resolved, st, log), log), nil
 	})
 	if err != nil {
 		return err
 	}
 	a := val.(*app)
+	id, err = id.resolve(ctx, a.st)
+	if err != nil {
+		pool.Delete(database)
+		return err
+	}
 	// A reload may change the upstream account; the shared runtime follows.
 	a.up.configure(base, username, password, id)
+	h.key = database
 	h.app = a
 	return nil
 }
@@ -114,6 +121,7 @@ func (h *Handler) Cleanup() error {
 		return nil
 	}
 	_, err := pool.Delete(h.key)
+	h.key = ""
 	return err
 }
 
@@ -132,6 +140,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyht
 //		client_name <name>
 //		device_name <name>
 //		device_id <id>
+//		client_version <version>
+//		user_agent <value>
 //	}
 func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	d.Next()
@@ -165,6 +175,10 @@ func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 			h.DeviceName = val
 		case "device_id":
 			h.DeviceID = val
+		case "client_version":
+			h.ClientVersion = val
+		case "user_agent":
+			h.UserAgent = val
 		default:
 			return d.Errf("unknown emby_users option %q", key)
 		}
