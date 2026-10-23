@@ -71,6 +71,42 @@ func TestSharedAccountFiltersAreNotForwarded(t *testing.T) {
 	}
 }
 
+// upstream: Latest accepts IsPlayed independently of the user's home settings.
+// https://dev.emby.media/doc/restapi/Latest-Items.html
+func TestLatestUsesLocalPlayedFilter(t *testing.T) {
+	h := newHarness(t)
+	alice := h.signIn("alice")
+	h.as(alice.Token, "POST", "/emby/Users/"+alice.UserID+"/PlayedItems/m01MOVIE", "")
+	h.up.reset()
+	base := "/emby/Users/" + alice.UserID + "/Items/Latest?Limit=20&IsPlayed="
+	for _, c := range []struct {
+		played string
+		want   []string
+	}{{"false", []string{"e01EP1"}}, {"true", []string{"m01MOVIE"}}} {
+		r := h.as(alice.Token, "GET", base+c.played, "")
+		var items []struct{ Id string }
+		if err := json.Unmarshal(r.Body, &items); err != nil {
+			t.Fatalf("latest: %d %s", r.Status, r.Body)
+		}
+		ids := make([]string, len(items))
+		for i, item := range items {
+			ids[i] = item.Id
+		}
+		if !reflect.DeepEqual(ids, c.want) {
+			t.Errorf("latest IsPlayed=%s: %v, want %v", c.played, ids, c.want)
+		}
+	}
+	for _, req := range h.up.seen() {
+		if !strings.HasSuffix(req.Path, "/Latest") {
+			continue
+		}
+		q, _ := url.ParseQuery(req.Query)
+		if queryGet(q, "IsPlayed") != "" || queryGet(q, "Limit") != "20" {
+			t.Errorf("upstream latest query: %s", req.Query)
+		}
+	}
+}
+
 // contract: local admins manage local accounts, not the upstream server.
 // The upstream account's administrative permissions must not be inherited.
 func TestUpstreamManagementIsNotExposed(t *testing.T) {

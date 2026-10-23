@@ -180,10 +180,18 @@ func (a *app) nextUp(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) err
 // The upstream server applies the shared account's history, which is not
 // this user's.
 func (a *app) latest(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler) error {
-	return a.proxy(w, rc, next, func(ctx context.Context, rc *reqCtx, doc any) (any, error) {
-		cfg, err := a.effectiveConfiguration(ctx, rc.owner)
-		if err != nil || !cfg.Bool("HidePlayedInLatest") {
-			return doc, err
+	played, filter := queryBool(rc.q, "IsPlayed")
+	if !filter {
+		cfg, err := a.effectiveConfiguration(rc.ctx(), rc.owner)
+		if err != nil {
+			return err
+		}
+		filter = cfg.Bool("HidePlayedInLatest")
+		played = false
+	}
+	return a.proxy(w, withoutUserFilters(rc), next, func(_ context.Context, _ *reqCtx, doc any) (any, error) {
+		if !filter {
+			return doc, nil
 		}
 		list, ok := doc.([]any)
 		if !ok {
@@ -192,7 +200,7 @@ func (a *app) latest(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler) 
 		out := list[:0]
 		for _, it := range list {
 			o, _ := it.(*jsonx.Object)
-			if o != nil && o.Object("UserData") != nil && o.Object("UserData").Bool("Played") {
+			if o != nil && o.Object("UserData") != nil && o.Object("UserData").Bool("Played") != played {
 				continue
 			}
 			out = append(out, it)
@@ -317,30 +325,36 @@ func (a *app) items(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler) e
 		}
 		return a.collect(w, rc, ids, opts)
 	case f.excluding():
-		upRC := *rc
-		upRC.r = rc.r.Clone(rc.ctx())
-		upRC.r.URL.RawQuery = editQuery(rc.r.URL.RawQuery, func(k, v string) (string, bool, bool) {
-			switch strings.ToLower(k) {
-			case "isplayed", "isfavorite":
-				return "", true, false
-			case "filters":
-				var kept []string
-				for _, filter := range strings.Split(v, ",") {
-					switch strings.ToLower(strings.TrimSpace(filter)) {
-					case "isplayed", "isunplayed", "isfavorite", "isfavoriteorlikes", "isresumable", "likes", "dislikes":
-					default:
-						kept = append(kept, filter)
-					}
-				}
-				return strings.Join(kept, ","), true, len(kept) > 0
-			}
-			return v, false, true
-		})
-		return a.proxy(w, &upRC, next, func(_ context.Context, _ *reqCtx, doc any) (any, error) {
+		return a.proxy(w, withoutUserFilters(rc), next, func(_ context.Context, _ *reqCtx, doc any) (any, error) {
 			return dropItems(doc, f.keep), nil
 		})
 	}
 	return a.proxy(w, rc, next, nil)
+}
+
+// Only local state can filter by played/favorite status. Preserve the
+// caller's other query parameters when fetching candidates upstream.
+func withoutUserFilters(rc *reqCtx) *reqCtx {
+	out := *rc
+	out.r = rc.r.Clone(rc.ctx())
+	out.r.URL.RawQuery = editQuery(rc.r.URL.RawQuery, func(k, v string) (string, bool, bool) {
+		switch strings.ToLower(k) {
+		case "isplayed", "isfavorite":
+			return "", true, false
+		case "filters":
+			var kept []string
+			for _, filter := range strings.Split(v, ",") {
+				switch strings.ToLower(strings.TrimSpace(filter)) {
+				case "isplayed", "isunplayed", "isfavorite", "isfavoriteorlikes", "isresumable", "likes", "dislikes":
+				default:
+					kept = append(kept, filter)
+				}
+			}
+			return strings.Join(kept, ","), true, len(kept) > 0
+		}
+		return v, false, true
+	})
+	return &out
 }
 
 // dropItems removes items from a QueryResult and lowers its total to match.
