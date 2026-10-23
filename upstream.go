@@ -30,7 +30,7 @@ type upstream struct {
 	hc       *http.Client
 	username string
 	password string
-	deviceID string
+	id       identity
 	log      *zap.Logger
 	st       *store.Store
 
@@ -48,6 +48,14 @@ type upstream struct {
 	valid    *ttlCache[bool]
 }
 
+// identity is how the upstream server sees the plugin: one client on one
+// device, whoever is watching.
+type identity struct {
+	Client   string
+	Device   string
+	DeviceID string
+}
+
 // episode is the slice of an Episode the plugin needs to find the next one.
 type episode struct {
 	ID       string
@@ -57,7 +65,7 @@ type episode struct {
 	RunTime  int64
 }
 
-func newUpstream(base *url.URL, username, password, deviceID string, st *store.Store, log *zap.Logger) *upstream {
+func newUpstream(base *url.URL, username, password string, id identity, st *store.Store, log *zap.Logger) *upstream {
 	tr := http.DefaultTransport.(*http.Transport).Clone()
 	tr.ResponseHeaderTimeout = 30 * time.Second
 	return &upstream{
@@ -65,7 +73,7 @@ func newUpstream(base *url.URL, username, password, deviceID string, st *store.S
 		hc:       &http.Client{Transport: tr, Timeout: 60 * time.Second},
 		username: username,
 		password: password,
-		deviceID: deviceID,
+		id:       id,
 		log:      log,
 		st:       st,
 		items:    newTTLCache[[]byte](2*time.Minute, 2000),
@@ -79,10 +87,10 @@ func newUpstream(base *url.URL, username, password, deviceID string, st *store.S
 
 // configure applies the Caddyfile settings. Pointing the plugin at another
 // server or account drops the saved sign-in and every cached item.
-func (u *upstream) configure(base *url.URL, username, password, deviceID string) {
+func (u *upstream) configure(base *url.URL, username, password string, id identity) {
 	u.mu.Lock()
-	changed := u.base.String() != base.String() || u.username != username || u.password != password || u.deviceID != deviceID
-	u.base, u.username, u.password, u.deviceID = base, username, password, deviceID
+	changed := u.base.String() != base.String() || u.username != username || u.password != password || u.id != id
+	u.base, u.username, u.password, u.id = base, username, password, id
 	if changed {
 		u.token, u.userID, u.serverID = "", "", ""
 	}
@@ -100,13 +108,13 @@ type upstreamConfig struct {
 	base     url.URL
 	username string
 	password string
-	deviceID string
+	id       identity
 }
 
 func (u *upstream) config() upstreamConfig {
 	u.mu.RLock()
 	defer u.mu.RUnlock()
-	return upstreamConfig{base: *u.base, username: u.username, password: u.password, deviceID: u.deviceID}
+	return upstreamConfig{base: *u.base, username: u.username, password: u.password, id: u.id}
 }
 
 // credentials returns the upstream token, user id and server id.
@@ -166,7 +174,43 @@ func (u *upstream) set(token, userID, serverID string) {
 }
 
 func (u *upstream) authHeader() string {
-	return fmt.Sprintf(`MediaBrowser Client="caddy-emby-users", Device="caddy-emby-users", DeviceId="%s", Version="%s"`, u.config().deviceID, version)
+	id := u.config().id
+	return fmt.Sprintf(`MediaBrowser Client="%s", Device="%s", DeviceId="%s", Version="%s"`, id.Client, id.Device, id.DeviceID, version)
+}
+
+func (u *upstream) userAgent() string { return u.config().id.Client + "/" + version }
+
+// disguise makes a request look like it comes from the plugin's own device.
+// Clients name themselves in the authorization header, in query parameters
+// and in User-Agent; left alone, the upstream server would see one device
+// per friend behind the one account.
+func (u *upstream) disguise(r *http.Request, token string) {
+	id := u.config().id
+	auth := u.authHeader()
+	if token != "" {
+		auth += `, Token="` + token + `"`
+	}
+	r.Header.Set("X-Emby-Authorization", auth)
+	if lower := strings.ToLower(r.Header.Get("Authorization")); strings.HasPrefix(lower, "emby ") || strings.HasPrefix(lower, "mediabrowser ") {
+		r.Header.Del("Authorization")
+	}
+	for _, h := range []string{"X-Emby-Client", "X-Emby-Device-Name", "X-Emby-Device-Id", "X-Emby-Client-Version"} {
+		r.Header.Del(h)
+	}
+	r.Header.Set("User-Agent", u.userAgent())
+	r.URL.RawQuery = editQuery(r.URL.RawQuery, func(k, v string) (string, bool, bool) {
+		switch strings.ToLower(k) {
+		case "x-emby-client":
+			return id.Client, true, true
+		case "x-emby-device-name":
+			return id.Device, true, true
+		case "x-emby-device-id", "deviceid":
+			return id.DeviceID, true, true
+		case "x-emby-client-version":
+			return version, true, true
+		}
+		return v, false, true
+	})
 }
 
 func (u *upstream) loginLocked(ctx context.Context) error {
@@ -178,6 +222,7 @@ func (u *upstream) loginLocked(ctx context.Context) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Emby-Authorization", u.authHeader())
+	req.Header.Set("User-Agent", u.userAgent())
 	resp, err := u.hc.Do(req)
 	if err != nil {
 		return fmt.Errorf("upstream sign-in: %w", err)
@@ -239,6 +284,7 @@ func (u *upstream) do(ctx context.Context, method, path string, q url.Values, bo
 		}
 		req.Header.Set("X-Emby-Token", tok)
 		req.Header.Set("X-Emby-Authorization", u.authHeader()+`, Token="`+tok+`"`)
+		req.Header.Set("User-Agent", u.userAgent())
 		if body != nil {
 			req.Header.Set("Content-Type", "application/json")
 		}
@@ -268,6 +314,8 @@ func (u *upstream) tokenValid(ctx context.Context, tok string) bool {
 		return false
 	}
 	req.Header.Set("X-Emby-Token", tok)
+	req.Header.Set("X-Emby-Authorization", u.authHeader())
+	req.Header.Set("User-Agent", u.userAgent())
 	resp, err := u.hc.Do(req)
 	if err != nil {
 		return false

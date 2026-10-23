@@ -430,6 +430,8 @@ func TestCaddyfile(t *testing.T) {
 		username {env.EMBY_USERNAME}
 		password {env.EMBY_PASSWORD}
 		database /data/emby-users.db
+		client_name Emby
+		device_name Home
 		device_id gateway
 	}`)
 	var got Handler
@@ -437,7 +439,7 @@ func TestCaddyfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := Handler{Upstream: "https://emby.example.com", Username: "{env.EMBY_USERNAME}", Password: "{env.EMBY_PASSWORD}",
-		Database: "/data/emby-users.db", DeviceID: "gateway"}
+		Database: "/data/emby-users.db", ClientName: "Emby", DeviceName: "Home", DeviceID: "gateway"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v", got)
 	}
@@ -524,5 +526,39 @@ func TestForbiddenUpstreamPagesDoNotSignInAgain(t *testing.T) {
 	h.up.mu.Unlock()
 	if after != before {
 		t.Errorf("upstream sign-ins went from %d to %d", before, after)
+	}
+}
+
+// Everyone reaches the upstream server as one client on one device: friends'
+// device names, device ids and user agents never leave the gateway.
+func TestUpstreamSeesOneDevice(t *testing.T) {
+	h := newHarness(t)
+	alice := h.signIn("alice")
+	h.up.reset()
+	friend := []string{
+		"User-Agent", "Infuse-Direct/7.8",
+		"X-Emby-Authorization", `Emby UserId="", Client="Infuse", Device="Alice's iPad", DeviceId="ipad-of-alice", Version="7.8", Token="` + alice.Token + `"`,
+		"X-Emby-Device-Name", "Alice's iPad",
+	}
+	h.do("GET", "/emby/Users/"+alice.UserID+"/Views?X-Emby-Client=Infuse&X-Emby-Device-Id=ipad-of-alice&DeviceId=ipad-of-alice", "", friend...)
+	h.do("GET", "/emby/Items/e01EP1/Images/Primary?X-Emby-Device-Id=ipad-of-alice", "", "User-Agent", "Infuse-Direct/7.8")
+	h.do("GET", "/play/video/e01EP1?api_key="+alice.Token+"&DeviceId=ipad-of-alice", "", "User-Agent", "Infuse-Direct/7.8")
+	reqs := h.up.seen()
+	if len(reqs) < 3 {
+		t.Fatalf("upstream saw %d requests", len(reqs))
+	}
+	for _, req := range reqs {
+		all := fmt.Sprint(req.Header) + req.Query
+		for _, leak := range []string{"ipad-of-alice", "Alice", "Infuse"} {
+			if strings.Contains(all, leak) {
+				t.Errorf("%s %s carries %q: %s", req.Method, req.Path, leak, all)
+			}
+		}
+		if ua := req.Header.Get("User-Agent"); ua != "gateway/"+version {
+			t.Errorf("%s: User-Agent %q", req.Path, ua)
+		}
+		if a := req.Header.Get("X-Emby-Authorization"); !strings.Contains(a, `DeviceId="test-device"`) {
+			t.Errorf("%s: X-Emby-Authorization %q", req.Path, a)
+		}
 	}
 }

@@ -16,6 +16,7 @@
 - 继续观看和下一集由插件计算，按已看、收藏或可续播筛选的列表也是。剧集的未看集数按本人的记录算。
 - `UserSettings` 和 `DisplayPreferences` 在本地应答，`/Sessions`、`/Devices` 与 WebSocket 心跳也是。
 - 会改动共享账号的写请求不转发，比如删除条目和刷新媒体库，也包括改上游用户配置、建播放列表。
+- 上游看到的始终是同一个客户端、同一台设备。客户端在授权头和查询参数里报的名字与设备 ID 会被换掉，`User-Agent` 也统一成一个值。
 
 ## 构建
 
@@ -36,16 +37,22 @@ emby.example.com {
 	}
 	reverse_proxy https://upstream.example.com {
 		header_up Host upstream.example.com
+		header_up -X-Forwarded-For
+		header_up -X-Forwarded-Host
+		header_up -X-Forwarded-Proto
+		header_up -Via
 	}
 }
 ```
+
+`reverse_proxy` 默认会把客户端的 IP 写进 `X-Forwarded-For`，还会加一个 `Via` 头。上面四行把它们去掉，上游就只看得到 Caddy 所在机器的地址。
 
 | 选项 | 说明 |
 |---|---|
 | `upstream` | 上游 Emby 服务器的地址，和 `reverse_proxy` 指向同一台。插件自己调用上游 API 时也用它 |
 | `username`、`password` | 上游账号。支持 `{env.*}` 占位符 |
 | `database` | SQLite 文件路径，默认是 Caddy 数据目录下的 `emby-users.db` |
-| `device_id` | 插件在上游显示的设备 ID，默认 `caddy-emby-users` |
+| `client_name`、`device_name`、`device_id` | 上游看到的客户端名、设备名和设备 ID，所有朋友的请求都用这一套。默认都是 `caddy-emby-users` |
 
 `emby_users` 自动排在 `reverse_proxy` 前面，不需要写 `order` 或 `route`。
 
@@ -96,7 +103,7 @@ curl -s https://emby.example.com/Users/AuthenticateByName \
 - 同一个地址每分钟最多尝试登录 10 次。同一个用户名 15 分钟内失败 10 次后暂停登录。
 - 续播规则沿用 Emby 的默认值。播放不到 5% 不记进度，超过 90% 或离结尾不到 1 秒算看完，不到 5 分钟的视频开始播放后停下就算看过。
 - 按已看、收藏筛选的列表最多处理最近的 500 个条目。筛选"未看"时，插件从上游当前页里去掉看过的条目，总数是估算值。
-- 上游服务器会把所有朋友的播放算作这一个账号在不同设备上的播放。服务商如果限制同时播放数或设备数，会按这个账号计算。
+- 几个朋友同时看，上游看到的是同一台设备开着几路播放。服务商如果限制同时播放数，会按这个账号计算。上游如果对播放做转码，同一台设备上同时进行的两路转码可能互相顶掉。
 - 不支持设备之间的远程控制、播放列表和同步下载。
 
 ## 开发

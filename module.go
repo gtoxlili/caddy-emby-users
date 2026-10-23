@@ -40,8 +40,12 @@ type Handler struct {
 	// Database is the SQLite file for accounts and play state. Defaults to
 	// emby-users.db in Caddy's data directory.
 	Database string `json:"database,omitempty"`
-	// DeviceID names this plugin on the upstream server.
-	DeviceID string `json:"device_id,omitempty"`
+	// ClientName, DeviceName and DeviceID are what the upstream server sees
+	// on every request, whoever makes it. They default to
+	// "caddy-emby-users".
+	ClientName string `json:"client_name,omitempty"`
+	DeviceName string `json:"device_name,omitempty"`
+	DeviceID   string `json:"device_id,omitempty"`
 
 	app *app
 	key string
@@ -72,9 +76,11 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 	if database == "" {
 		database = defaultDatabase()
 	}
-	deviceID := h.DeviceID
-	if deviceID == "" {
-		deviceID = "caddy-emby-users"
+	id := identity{Client: h.ClientName, Device: h.DeviceName, DeviceID: h.DeviceID}
+	for _, f := range []*string{&id.Client, &id.Device, &id.DeviceID} {
+		if *f == "" {
+			*f = "caddy-emby-users"
+		}
 	}
 	base, err := url.Parse(upstreamURL)
 	if err != nil || base.Host == "" || (base.Scheme != "http" && base.Scheme != "https") {
@@ -90,14 +96,14 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 		if err != nil {
 			return nil, fmt.Errorf("emby_users: opening %s: %w", database, err)
 		}
-		return newApp(st, newUpstream(base, username, password, deviceID, st, log), log), nil
+		return newApp(st, newUpstream(base, username, password, id, st, log), log), nil
 	})
 	if err != nil {
 		return err
 	}
 	a := val.(*app)
 	// A reload may change the upstream account; the shared runtime follows.
-	a.up.configure(base, username, password, deviceID)
+	a.up.configure(base, username, password, id)
 	h.app = a
 	return nil
 }
@@ -123,6 +129,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyht
 //		username <name>
 //		password <password>
 //		database <path>
+//		client_name <name>
+//		device_name <name>
 //		device_id <id>
 //	}
 func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
@@ -151,6 +159,10 @@ func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 			h.Password = val
 		case "database":
 			h.Database = val
+		case "client_name":
+			h.ClientName = val
+		case "device_name":
+			h.DeviceName = val
 		case "device_id":
 			h.DeviceID = val
 		default:

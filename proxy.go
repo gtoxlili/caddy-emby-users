@@ -47,6 +47,7 @@ func (a *app) proxy(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler, p
 			out.ContentLength = int64(len(body))
 		}
 		swapCredentials(out, tok, uid)
+		a.up.disguise(out, tok)
 		// Not every Emby-compatible server reads the token from every place
 		// clients put it; all of them read this header.
 		out.Header.Set("X-Emby-Token", tok)

@@ -244,7 +244,7 @@ func newHarness(t *testing.T) *harness {
 	}
 	t.Cleanup(func() { st.Close() })
 	base, _ := url.Parse(up.srv.URL)
-	a := newApp(st, newUpstream(base, "owner", upPassword, "test-device", st, zap.NewNop()), zap.NewNop())
+	a := newApp(st, newUpstream(base, "owner", upPassword, identity{Client: "gateway", Device: "gateway", DeviceID: "test-device"}, st, zap.NewNop()), zap.NewNop())
 	rp := httputil.NewSingleHostReverseProxy(base)
 	next := caddyhttp.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 		rp.ServeHTTP(w, r)

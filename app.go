@@ -90,9 +90,11 @@ func (a *app) serve(w http.ResponseWriter, r *http.Request, next caddyhttp.Handl
 		if sessionOnly(segs) {
 			return writeText(w, http.StatusUnauthorized, textUnauthorized)
 		}
-		// Public resources (images, branding, server info) go through as
-		// they are; anything else the upstream server refuses on its own.
-		return next.ServeHTTP(w, r)
+		// Public resources (images, branding) go through without a token;
+		// anything else the upstream server refuses on its own.
+		out := r.Clone(r.Context())
+		a.up.disguise(out, "")
+		return next.ServeHTTP(w, out)
 	}
 	sess, user, err := a.sessions.lookup(rc.ctx(), a.st, rc.client.Token)
 	if err != nil {
