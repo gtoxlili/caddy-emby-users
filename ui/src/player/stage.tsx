@@ -1,6 +1,7 @@
 // One title on the screen. The <video> element stays for the whole visit; a new source
 // (another audio track, a subtitle burned in, a different quality) is attached to the same
-// element where the old one left off.
+// element where the old one left off. A file the page remuxes itself brings its own
+// subtitles, painted here as text or, for PGS, as pictures.
 
 import { Play, RotateCcw, X } from 'lucide-react'
 import type { ReactNode, PointerEvent as ReactPointerEvent } from 'react'
@@ -14,9 +15,10 @@ import { useStageName } from '../components/vt'
 import { episodeLabel, ticksToSeconds, years } from '../format'
 import { Button } from '../ui/button'
 import { Spinner } from '../ui/spinner'
+import { toast } from '../ui/toast'
 import { useMobile } from '../use-mobile'
 import { Ambilight } from './ambilight'
-import { Captions, Tracks } from './captions'
+import { BitmapCaptions, Captions, Tracks } from './captions'
 import { Controls } from './controls'
 import type { Engine, FatalKind } from './engine'
 import { attach, IOS } from './engine'
@@ -24,7 +26,7 @@ import { toggleFullscreen, useMediaState } from './media'
 import type { Option } from './menus'
 import { usePlaybackReport } from './report'
 import type { Source } from './source'
-import { describeReasons, methodLabel, NoStream, streamsOf } from './source'
+import { describeSource, embyKind, NoStream, streamsOf } from './source'
 
 const RATE_KEY = 'emby-users.rate'
 const VOLUME_KEY = 'emby-users.volume'
@@ -85,6 +87,7 @@ export function Stage(p: StageProps) {
     const runtime = ticksToSeconds(p.item.RunTimeTicks)
     const media = useMediaState(video, runtime)
     const [error, setError] = useState<FatalKind | null>(null)
+    const [engine, setEngine] = useState<Engine | null>(null)
     const [blocked, setBlocked] = useState(false)
     const [ended, setEnded] = useState(false)
     const [ambilight, setAmbilight] = useState(() => saved(AMBILIGHT_KEY, 1) === 1)
@@ -92,7 +95,10 @@ export function Stage(p: StageProps) {
     const [flash, setFlash] = useState<{ side: 'left' | 'right'; n: number } | null>(null)
     const position = useRef(p.start)
     const vt = useStageName(p.item.Id)
-    const report = usePlaybackReport(p.item.Id, p.source, { audio: p.audio, subtitle: p.subtitle ?? -1 })
+    const report = usePlaybackReport(p.item.Id, p.source, {
+        audio: p.source?.audio ?? p.audio,
+        subtitle: p.subtitle ?? -1,
+    })
     const at = () => video?.currentTime || position.current
 
     // ---- the picture leaves the page, the sound stays ----
@@ -128,6 +134,7 @@ export function Stage(p: StageProps) {
                 return
             }
             engine = e
+            setEngine(e)
             const rate = saved(RATE_KEY, 1)
             video.defaultPlaybackRate = rate
             video.playbackRate = rate
@@ -140,8 +147,13 @@ export function Stage(p: StageProps) {
         return () => {
             gone = true
             engine?.destroy()
+            setEngine(null)
         }
     }, [video, p.source])
+
+    useEffect(() => {
+        if (p.source?.warning) toast(p.source.warning)
+    }, [p.source])
 
     // ---- element events: reports, ending, errors ----
     useEffect(() => {
@@ -286,7 +298,12 @@ export function Stage(p: StageProps) {
                     if (video) video.muted = !video.muted
                     break
                 case 'c':
-                    p.onSubtitle(p.subtitle === null ? (p.source?.tracks[0]?.index ?? null) : null, at())
+                    p.onSubtitle(
+                        p.subtitle === null
+                            ? (p.source?.tracks[0]?.index ?? p.source?.embedded[0]?.Index ?? null)
+                            : null,
+                        at(),
+                    )
                     break
                 case 'N':
                 case 'n':
@@ -450,8 +467,22 @@ export function Stage(p: StageProps) {
     // ---- menus ----
     const audios = streamsOf(p.source?.media ?? p.item.MediaSources?.[0], 'Audio')
     const subs = streamsOf(p.source?.media ?? p.item.MediaSources?.[0], 'Subtitle')
-    const selectedTrack = p.source?.tracks.some(t => t.index === p.subtitle) ? p.subtitle : null
-    const info = p.source ? [methodLabel(p.source), ...describeReasons(p.source)] : []
+    const local = p.source?.delivery === 'local'
+    const chosenSub = subs.find(s => s.Index === p.subtitle)
+    // Read out of the file when the page remuxes it, else the server's WebVTT.
+    const embedded = local && chosenSub && !chosenSub.IsExternal ? embyKind(chosenSub) : null
+    const textTrack =
+        p.subtitle !== null && (embedded === 'text' || p.source?.tracks.some(t => t.index === p.subtitle))
+            ? p.subtitle
+            : null
+    const bitmapTrack = embedded === 'bitmap' ? p.subtitle : null
+    const subtitleHint = (s: (typeof subs)[number]) => {
+        if (local) return s.IsExternal || embyKind(s) ? undefined : '网页里显示不了这种字幕'
+        if (s.IsTextSubtitleStream !== false) return undefined
+        return p.source?.media.SupportsTranscoding === false ? '服务器不转码，显示不了' : '图形字幕，要转码烧进画面'
+    }
+    const info = p.source ? describeSource(p.source) : []
+    const canTranscode = p.source?.media.SupportsTranscoding !== false
 
     const nextLabel = p.next ? `${episodeLabel(p.next)}「${p.next.Name}」` : ''
     const loadingSource = !p.source && !p.sourceError
@@ -459,12 +490,14 @@ export function Stage(p: StageProps) {
         ? p.sourceError instanceof NoStream
             ? p.sourceError.code === 'NotAllowed'
                 ? '这个账号在 Emby 服务器上没有播放权限。'
-                : 'Emby 服务器找不到能在这里播放的方式。'
+                : `${p.sourceError.detail ?? 'Emby 服务器找不到能在这里播放的方式。'}可以用 Emby App 看。`
             : describeError(p.sourceError)
         : error && !(error !== 'network' && p.source?.method === 'DirectPlay' && p.canFallback)
           ? error === 'network'
               ? '连接断了，视频没能继续加载。'
-              : '这个浏览器解不了这段视频，服务器转码也没能播出来。换个画质试试，或者在 Emby App 里看。'
+              : canTranscode
+                ? '这个浏览器解不了这段视频，服务器转码也没能播出来。换个画质试试，或者在 Emby App 里看。'
+                : '这个浏览器解不了这段视频，服务器也不转码。可以用 Emby App 看。'
           : null
 
     return (
@@ -498,10 +531,16 @@ export function Stage(p: StageProps) {
                     media.started ? 'opacity-100' : 'opacity-0',
                 )}
             >
-                {p.source && <Tracks tracks={p.source.tracks} />}
+                {p.source && <Tracks tracks={p.source.tracks} selected={textTrack} />}
             </video>
 
-            <Captions video={video} selected={selectedTrack} raised={visible || media.paused} />
+            <Captions video={video} selected={textTrack} raised={visible || media.paused} />
+            <BitmapCaptions
+                video={video}
+                subtitles={engine?.subtitles}
+                selected={bitmapTrack}
+                raised={visible || media.paused}
+            />
 
             {/* gestures sit above the picture and below the controls */}
             <div
@@ -564,14 +603,17 @@ export function Stage(p: StageProps) {
                 mobile={mobile}
                 title={title}
                 subtitle={subtitle}
-                media={media}
+                // MSE in Safari plays only with AirPlay off.
+                media={local ? { ...media, airplay: false } : media}
                 itemId={p.item.Id}
                 chapters={p.item.Chapters}
                 hasNext={!!p.next}
                 hasEpisodes={!!p.onEpisodes}
                 canPip={typeof document !== 'undefined' && document.pictureInPictureEnabled && !IOS_STANDALONE}
                 audio={{
-                    value: String(p.audio ?? p.source?.media.DefaultAudioStreamIndex ?? audios[0]?.Index ?? ''),
+                    value: String(
+                        p.source?.audio ?? p.audio ?? p.source?.media.DefaultAudioStreamIndex ?? audios[0]?.Index ?? '',
+                    ),
                     options: audios.map(s => ({ value: String(s.Index), label: trackName(s) })),
                     onChange: v => p.onAudio(Number(v), at()),
                 }}
@@ -582,16 +624,17 @@ export function Stage(p: StageProps) {
                         ...subs.map(s => ({
                             value: String(s.Index),
                             label: trackName(s),
-                            hint: s.IsTextSubtitleStream === false ? '图形字幕，要转码烧进画面' : undefined,
+                            hint: subtitleHint(s),
                         })),
                     ],
                     onChange: v => p.onSubtitle(v === 'off' ? null : Number(v), at()),
                 }}
-                quality={{
-                    value: String(p.quality),
-                    options: QUALITIES,
-                    onChange: v => p.onQuality(Number(v), at()),
-                }}
+                quality={
+                    // A server that never transcodes has only the original to offer.
+                    canTranscode
+                        ? { value: String(p.quality), options: QUALITIES, onChange: v => p.onQuality(Number(v), at()) }
+                        : null
+                }
                 rate={{
                     value: String(media.rate),
                     options: RATES.map(r => ({ value: r, label: r === '1' ? '正常' : `${r}×` })),

@@ -60,9 +60,15 @@ app on this site; Emby's apps and the files they check under `/web/` keep workin
 
 - Sign in with the same local account as the apps. Continue watching, favorites and
   watched marks are the same in both.
-- Plays in the browser what it can decode and asks the upstream server to remux or
-  transcode the rest over HLS. Text subtitles (SRT, ASS) are shown as text; image
-  subtitles (PGS, VobSub) are burned into a transcode.
+- Plays MP4 the browser decodes as is. Other files (MKV, Dolby or DTS sound) are
+  remuxed in the browser over MSE, so an upstream that only serves files still plays:
+  the picture is copied, sound MSE cannot take is converted to stereo AAC in
+  WebAssembly, and embedded SRT, ASS and PGS subtitles are read out of the file.
+  iPhone needs iOS 17.1. What the browser cannot decode at all (TrueHD, HEVC without
+  hardware support) goes to an upstream HLS transcode where the server offers one;
+  without one, a TrueHD-only file plays without sound.
+- External subtitles are fetched and converted to WebVTT in the page; VobSub is
+  burned into a transcode where the server offers one.
 - Administrators manage accounts and devices at `/web/manage`.
 
 The client is source in `ui/`; CI builds it into release tags. To work on it (Node 26,

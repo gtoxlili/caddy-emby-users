@@ -1,19 +1,45 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '../cn'
+import type { EmbeddedSubtitles } from './engine'
+import type { PgsTrack } from './local/pgs'
+import { paint } from './local/pgs'
+import { toVtt } from './local/text'
+import { findLocalTrack } from './local-tracks'
 import type { TextTrack as SubTrack } from './source'
 
-/** <track> elements for the WebVTT subtitles; each gets an id so its TextTrack can be found again. */
-export function Tracks({ tracks }: { tracks: SubTrack[] }) {
-    return tracks.map(t => (
-        <track
-            key={t.url}
-            id={`sub-${t.index}`}
-            kind="subtitles"
-            src={t.url}
-            label={t.label}
-            srcLang={t.lang || undefined}
-        />
-    ))
+/**
+ * <track> elements for the subtitles the server sends, each with an id so its TextTrack can
+ * be found again. A track is fetched once it is first chosen; whatever format the server
+ * really sent (some send the original ASS or SubRip whatever was asked for) becomes WebVTT
+ * in the page.
+ */
+export function Tracks({ tracks, selected }: { tracks: SubTrack[]; selected: number | null }) {
+    return tracks.map(t => <ServerTrack key={t.url} track={t} wanted={selected === t.index} />)
+}
+
+function ServerTrack({ track: t, wanted }: { track: SubTrack; wanted: boolean }) {
+    const [src, setSrc] = useState<string | null>(null)
+    const [asked, setAsked] = useState(wanted)
+    if (wanted && !asked) setAsked(true)
+    useEffect(() => {
+        if (!asked) return
+        let url: string | null = null
+        let gone = false
+        fetch(t.url)
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`${r.status}`))))
+            .then(text => {
+                if (gone) return
+                url = URL.createObjectURL(new Blob([toVtt(text)], { type: 'text/vtt' }))
+                setSrc(url)
+            })
+            .catch(() => {})
+        return () => {
+            gone = true
+            if (url) URL.revokeObjectURL(url)
+        }
+    }, [asked, t.url])
+    if (!src) return null
+    return <track id={`sub-${t.index}`} kind="subtitles" src={src} label={t.label} srcLang={t.lang || undefined} />
 }
 
 /**
@@ -52,8 +78,14 @@ export function Captions({
         const apply = () => {
             current?.removeEventListener('cuechange', render)
             current = null
-            for (const t of Array.from(video.textTracks)) {
-                const on = selected !== null && t.id === `sub-${selected}`
+            // The server's WebVTT when there is one, else what the page read out of the file.
+            const all = Array.from(video.textTracks)
+            const chosen =
+                selected === null
+                    ? null
+                    : (all.find(t => t.id === `sub-${selected}`) ?? findLocalTrack(video, selected) ?? null)
+            for (const t of all) {
+                const on = t === chosen
                 t.mode = on ? (nativeFullscreen ? 'showing' : 'hidden') : 'disabled'
                 if (on) current = t
             }
@@ -87,6 +119,76 @@ export function Captions({
             className={cn(
                 'captions pointer-events-none absolute inset-x-[6%] z-[5] flex flex-col items-center gap-[0.15em] text-center transition-[bottom] duration-300 ease-(--ease-out)',
                 raised ? 'bottom-[max(140px,16cqh)]' : 'bottom-[7cqh]',
+            )}
+        />
+    )
+}
+
+/**
+ * Graphic subtitles (PGS) read out of the file, painted on a canvas laid over the picture.
+ * The canvas has the subtitle's own frame size and is fitted like the video, so positions
+ * the disc authored land where they were meant to; it moves up with the text captions
+ * while the controls show.
+ */
+export function BitmapCaptions({
+    video,
+    subtitles,
+    selected,
+    raised,
+}: {
+    video: HTMLVideoElement | null
+    subtitles: EmbeddedSubtitles | undefined
+    selected: number | null
+    raised: boolean
+}) {
+    const canvas = useRef<HTMLCanvasElement>(null)
+    const [track, setTrack] = useState<PgsTrack | null>(null)
+    useEffect(() => {
+        if (!subtitles || selected === null) {
+            setTrack(null)
+            return
+        }
+        const find = () => setTrack(subtitles.bitmap(selected))
+        find()
+        return subtitles.subscribe(find)
+    }, [subtitles, selected])
+    useEffect(() => {
+        const el = canvas.current
+        if (!video || !el || !track) return
+        let shown: unknown
+        let frame = 0
+        const draw = () => {
+            const e = track.at(video.currentTime)
+            if (e === shown) return
+            shown = e
+            paint(el, e)
+        }
+        const loop = () => {
+            draw()
+            frame = video.requestVideoFrameCallback?.(loop) ?? requestAnimationFrame(loop)
+        }
+        loop()
+        const off = track.subscribe(() => {
+            shown = undefined
+            draw()
+        })
+        video.addEventListener('seeked', draw)
+        return () => {
+            off()
+            video.removeEventListener('seeked', draw)
+            if (video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(frame)
+            else cancelAnimationFrame(frame)
+            paint(el, null)
+        }
+    }, [video, track])
+    if (!track) return null
+    return (
+        <canvas
+            ref={canvas}
+            aria-hidden
+            className={cn(
+                'pointer-events-none absolute inset-0 z-[5] size-full object-contain transition-transform duration-300 ease-(--ease-out)',
+                raised && '-translate-y-[calc(max(140px,16cqh)-7cqh)]',
             )}
         />
     )

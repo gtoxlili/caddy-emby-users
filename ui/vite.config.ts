@@ -50,7 +50,11 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '/emby': { target: api, changeOrigin: true },
+            // Some upstreams redirect streams and images to other paths of their own host
+            // (/play/..., /img/...); rewritten to the dev server, they stay same-origin as in production.
+            '/emby': { target: api, changeOrigin: true, autoRewrite: true, protocolRewrite: 'http' },
+            '/play': { target: api, changeOrigin: true },
+            '/img': { target: api, changeOrigin: true },
             '/web/manifest.json': { target: api, changeOrigin: true },
         },
     },
@@ -61,5 +65,7 @@ export default defineConfig({
         modulePreload: { polyfill: false },
         // The handler embeds dist as is; a stale file from an earlier build would ship.
         emptyOutDir: true,
+        // The WebAssembly decoders are single chunks, each fetched only for files that need it.
+        chunkSizeWarningLimit: 2000,
     },
 })

@@ -121,11 +121,14 @@ function Room({ item }: { item: Item }) {
     const [source, sourceError] = useMemo(() => {
         if (!info.data) return [undefined, info.error] as const
         try {
-            return [chooseSource(info.data, item.Id, req.subtitleIndex), null] as const
+            return [
+                chooseSource(info.data, item.Id, { audio: req.audioIndex, subtitle: req.subtitleIndex }),
+                null,
+            ] as const
         } catch (e) {
             return [undefined, e] as const
         }
-    }, [info.data, info.error, item.Id, req.subtitleIndex])
+    }, [info.data, info.error, item.Id, req.audioIndex, req.subtitleIndex])
 
     const [subtitle, setSubtitle] = useState<number | null>(initial.sub?.Index ?? null)
 
@@ -182,7 +185,7 @@ function Room({ item }: { item: Item }) {
             subtitle={subtitle}
             audio={req.audioIndex}
             quality={req.maxBitrate ?? 0}
-            canFallback={req.direct}
+            canFallback={req.direct && source?.media.SupportsTranscoding !== false}
             onSubtitle={(index, at) => {
                 if (index === null) {
                     localStorage.setItem(SUB_LANG, 'off')
@@ -193,6 +196,8 @@ function Room({ item }: { item: Item }) {
                 const stream = subStreams.find(s => s.Index === index)
                 if (stream?.Language) localStorage.setItem(SUB_LANG, stream.Language)
                 setSubtitle(index)
+                // A file the page remuxes shows its own subtitles, graphic ones too.
+                if (source?.delivery === 'local') return
                 if (stream && !isTextSubtitle(stream)) restart({ subtitleIndex: index }, at)
                 else if (source && source.burnedIn !== null) restart({ subtitleIndex: -1 }, at)
             }}
@@ -206,7 +211,7 @@ function Room({ item }: { item: Item }) {
                 restart({ maxBitrate: bps }, at)
             }}
             onFallback={at => {
-                toast('这个文件在浏览器里直接播不了，改由服务器转码')
+                toast('这个文件在浏览器里播不了，改由服务器转码')
                 restart({ direct: false }, at)
             }}
             onRetry={at => restart({}, at)}

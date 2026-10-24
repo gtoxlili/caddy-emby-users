@@ -60,7 +60,8 @@ export interface ControlsProps {
     canPip: boolean
     audio: { value: string; options: Option[]; onChange: (v: string) => void }
     subtitles: { value: string; options: Option[]; onChange: (v: string) => void }
-    quality: { value: string; options: Option[]; onChange: (v: string) => void }
+    /** Null when the server cannot offer anything but the original. */
+    quality: { value: string; options: Option[]; onChange: (v: string) => void } | null
     rate: { value: string; options: Option[]; onChange: (v: string) => void }
     ambilight: { on: boolean; onChange: (v: boolean) => void } | null
     info: string[]
@@ -255,10 +256,10 @@ export function Controls(p: ControlsProps) {
                                 }
                                 className="w-[268px]"
                             >
-                                <Choices label="画质" {...p.quality} />
+                                {p.quality && <Choices label="画质" {...p.quality} />}
                                 {p.ambilight && (
                                     <>
-                                        <MenuSeparator />
+                                        {p.quality && <MenuSeparator />}
                                         <MenuToggle
                                             label="氛围光"
                                             checked={p.ambilight.on}
@@ -268,7 +269,7 @@ export function Controls(p: ControlsProps) {
                                 )}
                                 {p.info.length > 0 && (
                                     <>
-                                        <MenuSeparator />
+                                        {(p.quality || p.ambilight) && <MenuSeparator />}
                                         {p.info.map(line => (
                                             <MenuNote key={line}>{line}</MenuNote>
                                         ))}

@@ -1,12 +1,22 @@
 // Puts a source into the <video> element. Files the browser plays as they are go straight
 // into src. HLS goes through hls.js on MSE, except on Safari, whose own HLS is better
 // (AirPlay works only with it) and on iOS the only choice that survives the lock screen.
+// Files the browser cannot open itself are remuxed in the page (./local), loaded on demand.
 
 import type Hls from 'hls.js'
+import type { PgsTrack } from './local/pgs'
 import type { Source } from './source'
+
+/** Subtitles the page reads out of the file itself. */
+export interface EmbeddedSubtitles {
+    kind(index: number): 'text' | 'bitmap' | null
+    bitmap(index: number): PgsTrack | null
+    subscribe(fn: () => void): () => void
+}
 
 export interface Engine {
     destroy(): void
+    subtitles?: EmbeddedSubtitles
 }
 
 const SAFARI =
@@ -19,7 +29,7 @@ const IOS =
 export type FatalKind = 'network' | 'decode' | 'unsupported'
 
 /** Seeks to start once the element knows its duration; some browsers ignore an earlier currentTime. */
-function seekOnLoad(video: HTMLVideoElement, start: number) {
+export function seekOnLoad(video: HTMLVideoElement, start: number) {
     if (start <= 0) return
     const go = () => {
         if (Math.abs(video.currentTime - start) > 1) video.currentTime = start
@@ -34,7 +44,12 @@ export async function attach(
     start: number,
     onFatal: (kind: FatalKind) => void,
 ): Promise<Engine> {
-    const native = !source.hls || ((SAFARI || IOS) && video.canPlayType('application/vnd.apple.mpegurl') !== '')
+    if (source.delivery === 'local') {
+        const { attachLocal } = await import('./local/engine')
+        return attachLocal(video, source, start, onFatal)
+    }
+    const native =
+        source.delivery === 'file' || ((SAFARI || IOS) && video.canPlayType('application/vnd.apple.mpegurl') !== '')
     if (native) {
         video.src = source.url
         seekOnLoad(video, start)

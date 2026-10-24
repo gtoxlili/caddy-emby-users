@@ -88,6 +88,7 @@ export interface MediaStream {
     Height?: number
     BitRate?: number
     BitDepth?: number
+    Level?: number
     Channels?: number
     ChannelLayout?: string
     Profile?: string
