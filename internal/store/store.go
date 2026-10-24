@@ -77,6 +77,23 @@ CREATE TABLE IF NOT EXISTS item_state (
 CREATE INDEX IF NOT EXISTS item_state_series ON item_state(user_id, series_id);
 CREATE INDEX IF NOT EXISTS item_state_season ON item_state(user_id, season_id);
 CREATE INDEX IF NOT EXISTS item_state_recent ON item_state(user_id, last_played);
+CREATE TABLE IF NOT EXISTS activity (
+	id        INTEGER PRIMARY KEY AUTOINCREMENT,
+	at        INTEGER NOT NULL,
+	type      TEXT NOT NULL,
+	user_id   TEXT NOT NULL DEFAULT '',
+	user_name TEXT NOT NULL DEFAULT '',
+	item_id   TEXT NOT NULL DEFAULT '',
+	title     TEXT NOT NULL DEFAULT '',
+	detail    TEXT NOT NULL DEFAULT '',
+	series_id TEXT NOT NULL DEFAULT '',
+	device    TEXT NOT NULL DEFAULT '',
+	client    TEXT NOT NULL DEFAULT '',
+	remote    TEXT NOT NULL DEFAULT '',
+	by_name   TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS activity_at ON activity(at);
+CREATE INDEX IF NOT EXISTS activity_user ON activity(user_id, at);
 `
 
 // Store is a handle to the database. It is safe for concurrent use.

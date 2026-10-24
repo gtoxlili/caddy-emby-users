@@ -78,8 +78,22 @@ func (a *app) listSessions(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handle
 		}
 		info := sessionInfo(s, serverID, item)
 		if item != nil {
-			info.Set("PlayState", obj("PositionTicks", np.position, "CanSeek", true, "IsPaused", np.paused,
-				"IsMuted", false, "RepeatMode", "RepeatNone", "PlayMethod", "DirectStream"))
+			state := obj("PositionTicks", np.position, "CanSeek", true, "IsPaused", np.paused,
+				"IsMuted", false, "RepeatMode", "RepeatNone")
+			// Only what the client reported; Emby leaves these out when it does not know them either.
+			if np.method != "" {
+				state.Set("PlayMethod", np.method)
+			}
+			if np.sourceID != "" {
+				state.Set("MediaSourceId", np.sourceID)
+			}
+			if np.audio != nil {
+				state.Set("AudioStreamIndex", *np.audio)
+			}
+			if np.subtitle != nil {
+				state.Set("SubtitleStreamIndex", *np.subtitle)
+			}
+			info.Set("PlayState", state)
 		}
 		out = append(out, info)
 	}

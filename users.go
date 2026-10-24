@@ -62,9 +62,15 @@ func (a *app) signIn(w http.ResponseWriter, rc *reqCtx, u *store.User, name, pw 
 		a.limiter.fail(name)
 		a.log.Warn("sign-in failed", zap.String("user", name), zap.String("remote", addr),
 			zap.String("client", rc.client.Name), zap.String("device", rc.client.Device))
+		failed := store.Activity{Type: actSignInFailed, UserName: name}
+		if u != nil {
+			failed.UserID, failed.UserName = u.ID, u.Name
+		}
+		a.logActivity(rc, failed)
 		return writeText(w, http.StatusUnauthorized, "Invalid username or password entered.")
 	}
 	if u.Disabled {
+		a.logActivity(rc, store.Activity{Type: actSignInFailed, UserID: u.ID, UserName: u.Name, Detail: "account disabled"})
 		return writeText(w, http.StatusUnauthorized, "This user account has been disabled.")
 	}
 	if err := a.up.ensure(rc.ctx()); err != nil {
@@ -92,6 +98,7 @@ func (a *app) signIn(w http.ResponseWriter, rc *reqCtx, u *store.User, name, pw 
 	a.sessions.invalidate()
 	a.log.Info("signed in", zap.String("user", u.Name), zap.String("remote", addr),
 		zap.String("client", rc.client.Name), zap.String("device", rc.client.Device))
+	a.logActivity(rc, store.Activity{Type: actSignedIn, UserID: u.ID, UserName: u.Name})
 
 	dto, err := a.userDTO(rc.ctx(), u)
 	if err != nil {
@@ -121,14 +128,10 @@ func (a *app) systemInfo(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler)
 	if len(rc.segs) == 3 {
 		path = "/System/Info/Public"
 	}
-	raw, ok := a.up.info.get(path)
-	if !ok {
-		var err error
-		if raw, err = a.up.get(rc.ctx(), path, nil); err != nil {
-			a.log.Error("fetching server info", zap.Error(err))
-			return writeText(w, http.StatusBadGateway, "Upstream server is unavailable.")
-		}
-		a.up.info.set(path, raw)
+	raw, err := a.serverInfo(rc.ctx(), path)
+	if err != nil {
+		a.log.Error("fetching server info", zap.Error(err))
+		return writeText(w, http.StatusBadGateway, "Upstream server is unavailable.")
 	}
 	v, err := jsonx.Decode(raw)
 	if err != nil {
@@ -386,6 +389,7 @@ func (a *app) createUser(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler)
 		return err
 	}
 	a.log.Info("user created", zap.String("user", name), zap.String("by", rc.user.Name))
+	a.logActivity(rc, store.Activity{Type: actCreated, UserID: u.ID, UserName: u.Name, ByName: rc.user.Name})
 	dto, err := a.userDTO(rc.ctx(), u)
 	if err != nil {
 		return err
@@ -414,6 +418,7 @@ func (a *app) updateUser(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler)
 	}
 	a.sessions.invalidate()
 	a.log.Info("user renamed", zap.String("from", target.Name), zap.String("to", name), zap.String("by", rc.user.Name))
+	a.logActivity(rc, store.Activity{Type: actRenamed, UserID: target.ID, UserName: name, Detail: target.Name, ByName: actor(rc, target)})
 	return noContent(w)
 }
 
@@ -452,6 +457,7 @@ func (a *app) deleteUser(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler)
 	}
 	a.sessions.invalidate()
 	a.log.Info("user deleted", zap.String("user", u.Name), zap.String("by", rc.user.Name))
+	a.logActivity(rc, store.Activity{Type: actDeleted, UserID: u.ID, UserName: u.Name, ByName: rc.user.Name})
 	return noContent(w)
 }
 
@@ -477,6 +483,7 @@ func (a *app) changePassword(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Hand
 		}
 		a.sessions.invalidate()
 		a.log.Info("password cleared", zap.String("user", target.Name), zap.String("by", rc.user.Name))
+		a.logActivity(rc, store.Activity{Type: actPassword, UserID: target.ID, UserName: target.Name, Detail: "cleared", ByName: actor(rc, target)})
 		return noContent(w)
 	}
 	next := bodyString(f, "newpw")
@@ -507,6 +514,7 @@ func (a *app) changePassword(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Hand
 	}
 	a.sessions.invalidate()
 	a.log.Info("password changed", zap.String("user", target.Name), zap.String("by", rc.user.Name))
+	a.logActivity(rc, store.Activity{Type: actPassword, UserID: target.ID, UserName: target.Name, ByName: actor(rc, target)})
 	return noContent(w)
 }
 
@@ -536,6 +544,9 @@ func (a *app) setPolicy(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) 
 	}
 	if err := a.st.SetFlags(rc.ctx(), u.ID, admin, disabled); err != nil {
 		return err
+	}
+	if changes := policyChanges(u, admin, disabled); changes != "" {
+		a.logActivity(rc, store.Activity{Type: actPolicy, UserID: u.ID, UserName: u.Name, Detail: changes, ByName: actor(rc, u)})
 	}
 	if disabled {
 		if err := a.st.DeleteUserSessions(rc.ctx(), u.ID, ""); err != nil {

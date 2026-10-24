@@ -84,8 +84,15 @@ func runPasswd(c *cobra.Command, name string, admin bool) error {
 	if err != nil {
 		return err
 	}
+	// Changes from here show in the activity log too, made by no account.
+	cli := store.Activity{Client: "caddy emby-users"}
 	if u == nil {
-		if _, err := st.CreateUser(ctx, name, pw, admin); err != nil {
+		created, err := st.CreateUser(ctx, name, pw, admin)
+		if err != nil {
+			return err
+		}
+		cli.Type, cli.UserID, cli.UserName = actCreated, created.ID, created.Name
+		if err := st.AddActivity(ctx, cli); err != nil {
 			return err
 		}
 		fmt.Fprintf(c.OutOrStdout(), "created %s\n", name)
@@ -94,8 +101,16 @@ func runPasswd(c *cobra.Command, name string, admin bool) error {
 	if err := st.SetPassword(ctx, u.ID, pw); err != nil {
 		return err
 	}
+	cli.Type, cli.UserID, cli.UserName = actPassword, u.ID, u.Name
+	if err := st.AddActivity(ctx, cli); err != nil {
+		return err
+	}
 	if admin && !u.Admin {
 		if err := st.SetFlags(ctx, u.ID, true, u.Disabled); err != nil {
+			return err
+		}
+		cli.Type, cli.Detail = actPolicy, policyChanges(u, true, u.Disabled)
+		if err := st.AddActivity(ctx, cli); err != nil {
 			return err
 		}
 	}

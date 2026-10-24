@@ -92,6 +92,9 @@ func (a *app) serve(w http.ResponseWriter, r *http.Request, next caddyhttp.Handl
 	if r.Method == http.MethodOptions {
 		return next.ServeHTTP(w, r)
 	}
+	if h := webRoute(rc); h != nil {
+		return h(a, w, rc, next)
+	}
 	if h := publicRoute(rc); h != nil {
 		return h(a, w, rc, next)
 	}
@@ -195,10 +198,7 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 	case get && match(s, "system/info"):
 		h = (*app).systemInfo
 	case get && match(s, "system/activitylog/entries"):
-		if !rc.user.Admin {
-			return writeText(w, http.StatusForbidden, textForbidden)
-		}
-		h = (*app).emptyResult
+		h = (*app).activityLog
 
 	// Accounts.
 	case get && match(s, "users"):
@@ -330,10 +330,6 @@ func (a *app) accepted(w http.ResponseWriter, _ *reqCtx, _ caddyhttp.Handler) er
 	return noContent(w)
 }
 
-func (a *app) emptyResult(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) error {
-	return a.writeJSON(w, rc, http.StatusOK, obj("Items", []any{}, "TotalRecordCount", 0))
-}
-
 // sessionCache keeps recent token lookups so most requests skip the database.
 type sessionCache struct {
 	mu sync.Mutex
@@ -456,6 +452,11 @@ type playingEntry struct {
 	position int64
 	paused   bool
 	at       time.Time
+	// What the client said about the stream; empty or nil when it did not.
+	method   string
+	sourceID string
+	audio    *int64
+	subtitle *int64
 }
 
 func (n *nowPlaying) set(sessionID string, e playingEntry) {

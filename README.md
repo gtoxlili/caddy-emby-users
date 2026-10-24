@@ -48,17 +48,40 @@ leaves it untouched; startup opens it. Reloads preserve local session and playba
 state. Passwords use Argon2id, local tokens use SHA-256 hashes, and the upstream
 access token is stored in the database.
 
+## Web client
+
+Browsers get a web client at `/web/`; `/` redirects there. It replaces Emby's own web
+app on this site; Emby's apps and the files they check under `/web/` keep working.
+
+- Sign in with the same local account as the apps. Continue watching, favorites and
+  watched marks are the same in both.
+- Plays in the browser what it can decode and asks the upstream server to remux or
+  transcode the rest over HLS. Text subtitles (SRT, ASS) are shown as text; image
+  subtitles (PGS, VobSub) are burned into a transcode.
+- Administrators manage accounts and devices at `/web/manage`.
+
+The built client lives in `ui/dist` and is embedded in the module, so `xcaddy` needs no
+Node toolchain. To work on it (Node 24+, pnpm), run Caddy with the plugin and:
+
+```sh
+cd ui
+pnpm install
+EMBY_USERS_DEV_API=http://127.0.0.1:8080 pnpm dev   # the Caddy site
+pnpm check && pnpm build                              # commit ui/dist with the change
+```
+
 ## Accounts
 
-Run as the same user and environment as Caddy. In Docker, run inside the container:
+Create the first administrator with the command below; the rest can be done at
+`/web/manage`. Run as the same user and environment as Caddy. In Docker, run inside the container:
 
 ```sh
 caddy emby-users passwd alice --admin
 caddy emby-users list
 ```
 
-Pass `--db /path/to/emby-users.db` for a custom path. Further management uses
-Emby's API with a local administrator token:
+Pass `--db /path/to/emby-users.db` for a custom path. The management pages use these
+Emby API endpoints, which also work with a local administrator token:
 
 | Request | Body / query |
 | --- | --- |
@@ -67,6 +90,7 @@ Emby's API with a local administrator token:
 | `POST /Users/{id}/Policy` | `{"IsDisabled":true}` |
 | `DELETE /Users/{id}` | |
 | `GET /Sessions` | |
+| `GET /System/ActivityLog/Entries` | `StartIndex`, `Limit`, `MinDate`, `UserId`; sign-ins, playback, account changes, kept 90 days |
 | `DELETE /Devices?Id=...` | |
 | `POST /EmbyUsers/Import?UserId=...` | Import upstream history once |
 
@@ -86,6 +110,7 @@ Emby's API with a local administrator token:
 ```sh
 go vet ./...
 go test -race ./...
+(cd ui && pnpm check)
 ```
 
 Includes real Caddy validation/reload, TLS transport, Range and cancellation tests.

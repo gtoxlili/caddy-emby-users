@@ -1,6 +1,7 @@
 package embyusers
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"net/http"
@@ -115,12 +116,42 @@ func (a *app) report(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) err
 	if itemID == "" {
 		return noContent(w)
 	}
-	pos, hasPos := bodyInt(f, "positionticks")
-	paused, _ := bodyBool(f, "ispaused")
-	if err := a.record(rc, itemID, event, pos, hasPos, paused); err != nil && !errors.Is(err, errNotFound) {
+	var rep playReport
+	rep.position, rep.hasPosition = bodyInt(f, "positionticks")
+	rep.paused, _ = bodyBool(f, "ispaused")
+	rep.method = playMethod(bodyString(f, "playmethod"))
+	rep.sourceID = bodyString(f, "mediasourceid")
+	if v, ok := bodyInt(f, "audiostreamindex"); ok {
+		rep.audio = &v
+	}
+	if v, ok := bodyInt(f, "subtitlestreamindex"); ok {
+		rep.subtitle = &v
+	}
+	if err := a.record(rc, itemID, event, rep); err != nil && !errors.Is(err, errNotFound) {
 		return err
 	}
 	return noContent(w)
+}
+
+// playReport is what a playback report says beyond which item it is about.
+type playReport struct {
+	position    int64
+	hasPosition bool
+	paused      bool
+	method      string
+	sourceID    string
+	audio       *int64
+	subtitle    *int64
+}
+
+// playMethod normalises the three values Emby knows; anything else is unknown.
+func playMethod(v string) string {
+	for _, m := range []string{"DirectPlay", "DirectStream", "Transcode"} {
+		if strings.EqualFold(v, m) {
+			return m
+		}
+	}
+	return ""
 }
 
 // legacyReport handles /Users/{id}/PlayingItems/{item}[/Progress], which
@@ -134,20 +165,21 @@ func (a *app) legacyReport(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handle
 	case len(rc.segs) == 5 && rc.segs[4] == "delete", rc.r.Method == http.MethodDelete:
 		event = playStop
 	}
-	pos, hasPos := int64(0), false
+	var rep playReport
 	if v := queryGet(rc.q, "PositionTicks"); v != "" {
-		if n, ok := bodyInt(map[string]any{"p": v}, "p"); ok {
-			pos, hasPos = n, true
-		}
+		rep.position, rep.hasPosition = bodyInt(map[string]any{"p": v}, "p")
 	}
-	paused, _ := queryBool(rc.q, "IsPaused")
-	if err := a.record(rc, itemID, event, pos, hasPos, paused); err != nil && !errors.Is(err, errNotFound) {
+	rep.paused, _ = queryBool(rc.q, "IsPaused")
+	rep.method = playMethod(queryGet(rc.q, "PlayMethod"))
+	rep.sourceID = queryGet(rc.q, "MediaSourceId")
+	if err := a.record(rc, itemID, event, rep); err != nil && !errors.Is(err, errNotFound) {
 		return err
 	}
 	return noContent(w)
 }
 
-func (a *app) record(rc *reqCtx, itemID string, event playEvent, pos int64, hasPos, paused bool) error {
+func (a *app) record(rc *reqCtx, itemID string, event playEvent, rep playReport) error {
+	pos, hasPos := rep.position, rep.hasPosition
 	ctx := rc.ctx()
 	o, err := a.up.item(ctx, itemID)
 	if err != nil {
@@ -160,14 +192,31 @@ func (a *app) record(rc *reqCtx, itemID string, event playEvent, pos int64, hasP
 	}
 	now := store.Now()
 	st.LastPlayed = now
+	entry := playingEntry{itemID: m.ID, position: pos, paused: rep.paused, at: time.Now(),
+		method: rep.method, sourceID: rep.sourceID, audio: rep.audio, subtitle: rep.subtitle}
 	switch event {
 	case playProgress:
 		if hasPos && pos > 0 {
 			st.Position = pos
 		}
-		a.playing.set(rc.sess.ID, playingEntry{itemID: m.ID, position: pos, paused: paused, at: time.Now()})
+		// Progress reports often leave out what the start report said about the stream.
+		if prev, ok := a.playing.get(rc.sess.ID); ok && prev.itemID == m.ID {
+			entry.method = cmp.Or(entry.method, prev.method)
+			entry.sourceID = cmp.Or(entry.sourceID, prev.sourceID)
+			if entry.audio == nil {
+				entry.audio = prev.audio
+			}
+			if entry.subtitle == nil {
+				entry.subtitle = prev.subtitle
+			}
+		}
+		a.playing.set(rc.sess.ID, entry)
 	case playStart:
-		a.playing.set(rc.sess.ID, playingEntry{itemID: m.ID, position: pos, at: time.Now()})
+		entry.paused = false
+		a.playing.set(rc.sess.ID, entry)
+		title, detail := playbackTitle(o)
+		a.logActivity(rc, store.Activity{Type: actPlayback, UserID: rc.owner.ID, UserName: rc.owner.Name,
+			ItemID: m.ID, Title: title, Detail: detail, SeriesID: m.SeriesID})
 	case playStop:
 		// A stop without a position says nothing about how far the user got;
 		// real Emby marks it watched, which loses a resume point on clients

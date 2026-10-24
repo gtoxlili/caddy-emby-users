@@ -1,0 +1,138 @@
+@import './tokens.css';
+
+/*
+ * One screen, many places: the home page's screen, a title's screen and the player share
+ * view-transition-name: screen, and a poster card and a title's poster share poster. Which
+ * element carries a name at any moment is decided in components/vt.ts. Size and position
+ * move on the spring; everything else crossfades.
+ */
+.vt-screen {
+    view-transition-name: screen;
+}
+.vt-poster {
+    view-transition-name: poster;
+}
+::view-transition-group(screen),
+::view-transition-group(poster) {
+    animation-duration: 0.66s;
+    animation-timing-function: var(--ease-spring);
+}
+::view-transition-old(screen),
+::view-transition-new(screen),
+::view-transition-old(poster),
+::view-transition-new(poster) {
+    animation: none;
+    mix-blend-mode: normal;
+    height: 100%;
+    overflow: clip;
+    object-fit: cover;
+}
+::view-transition-old(root) {
+    animation: 0.22s var(--ease-out) both vt-fade-out;
+}
+::view-transition-new(root) {
+    animation: 0.38s var(--ease-out) both vt-fade-in;
+}
+@keyframes vt-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+@keyframes vt-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+/* ---- player ---- */
+.stage {
+    /* iOS pops its save-and-share sheet on a long press, which is also the hold-for-2× gesture. */
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+.stage:fullscreen {
+    width: 100vw;
+    height: 100vh;
+}
+/* Subtitles: sized to the picture, outlined rather than boxed. */
+.captions .cue {
+    display: inline-block;
+    max-width: 100%;
+    font-size: clamp(17px, 4.6cqh, 48px);
+    line-height: 1.32;
+    font-weight: 600;
+    color: white;
+    white-space: pre-line;
+    text-wrap: balance;
+    text-shadow:
+        0 0 2px rgb(0 0 0),
+        0 0 1px rgb(0 0 0),
+        0 2px 6px rgb(0 0 0 / 0.75);
+}
+.captions .cue i {
+    font-style: italic;
+}
+/* The volume slider: a thin track lit up to the current level. */
+.volume {
+    appearance: none;
+    background: linear-gradient(to right, white var(--v), rgb(255 255 255 / 0.25) var(--v));
+    border-radius: 999px;
+}
+.volume::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+}
+.volume::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: 0;
+    border-radius: 50%;
+    background: white;
+}
+
+/* ---- management ---- */
+/* The roster: hairlines, tight rows, tabular figures. */
+.roster {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+}
+.roster th {
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--text-3);
+    padding: 0 12px 10px;
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+}
+.roster td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.roster tr:last-child td {
+    border-bottom: 0;
+}
+.roster tbody tr:hover td {
+    background: rgb(255 255 255 / 0.03);
+}
+/* Someone watching right now: a slow breath. */
+@keyframes breathe {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+.live-dot {
+    animation: breathe 1.8s ease-in-out infinite;
+}
