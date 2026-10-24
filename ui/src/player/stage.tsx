@@ -10,7 +10,7 @@ import { describeError } from '../api/error'
 import { backdropUrl, stillUrl } from '../api/images'
 import type { Item } from '../api/types'
 import { cn } from '../cn'
-import { trackName } from '../components/specs'
+import { codecName, trackName } from '../components/specs'
 import { useStageName } from '../components/vt'
 import { episodeLabel, ticksToSeconds, years } from '../format'
 import { Button } from '../ui/button'
@@ -21,7 +21,7 @@ import { Ambilight } from './ambilight'
 import { BitmapCaptions, Captions, Tracks } from './captions'
 import { Controls } from './controls'
 import type { Engine, FatalKind } from './engine'
-import { attach, IOS } from './engine'
+import { ANDROID, attach, IOS } from './engine'
 import { toggleFullscreen, useMediaState } from './media'
 import type { Option } from './menus'
 import { usePlaybackReport } from './report'
@@ -154,6 +154,28 @@ export function Stage(p: StageProps) {
     useEffect(() => {
         if (p.source?.warning) toast(p.source.warning)
     }, [p.source])
+
+    // A browser playing a file itself drops sound it cannot decode without a word. Chromium
+    // counts decoded audio bytes, so seconds of picture with none mean the sound is lost.
+    useEffect(() => {
+        const s = p.source
+        const stream = s?.media.MediaStreams.find(m => m.Index === s.audio)
+        if (!video || !s || s.delivery !== 'file' || !stream) return
+        let from: number | null = null
+        const check = () => {
+            const bytes = (video as HTMLVideoElement & { webkitAudioDecodedByteCount?: number })
+                .webkitAudioDecodedByteCount
+            if (bytes === undefined || video.paused) return
+            from ??= video.currentTime
+            if (video.currentTime - from < 4) return
+            video.removeEventListener('timeupdate', check)
+            if (bytes > 0) return
+            const name = codecName(stream.Codec) || stream.Codec || ''
+            toast(`这个浏览器解不了 ${name} 声音，只有画面`, 'info', ANDROID ? '换 Chrome 打开就有声音。' : undefined)
+        }
+        video.addEventListener('timeupdate', check)
+        return () => video.removeEventListener('timeupdate', check)
+    }, [video, p.source])
 
     // ---- element events: reports, ending, errors ----
     useEffect(() => {
@@ -482,6 +504,11 @@ export function Stage(p: StageProps) {
         return p.source?.media.SupportsTranscoding === false ? '服务器不转码，显示不了' : '图形字幕，要转码烧进画面'
     }
     const info = p.source ? describeSource(p.source) : []
+    const elsewhere = ANDROID
+        ? '换 Chrome 或 Edge 打开就能播，也可以用 Emby App 看。'
+        : IOS
+          ? 'iPhone 升到 iOS 17.1 以上就能播，也可以用 Emby App 看。'
+          : '可以用 Emby App 看。'
     const canTranscode = p.source?.media.SupportsTranscoding !== false
 
     const nextLabel = p.next ? `${episodeLabel(p.next)}「${p.next.Name}」` : ''
@@ -495,9 +522,11 @@ export function Stage(p: StageProps) {
         : error && !(error !== 'network' && p.source?.method === 'DirectPlay' && p.canFallback)
           ? error === 'network'
               ? '连接断了，视频没能继续加载。'
-              : canTranscode
-                ? '这个浏览器解不了这段视频，服务器转码也没能播出来。换个画质试试，或者在 Emby App 里看。'
-                : '这个浏览器解不了这段视频，服务器也不转码。可以用 Emby App 看。'
+              : p.source?.guess
+                ? `${p.source.guess}浏览器自带的播放器也打不开这个文件。${elsewhere}`
+                : canTranscode
+                  ? '这个浏览器解不了这段视频，服务器转码也没能播出来。换个画质试试，或者在 Emby App 里看。'
+                  : `这个浏览器解不了这段视频，服务器也不转码。${elsewhere}`
           : null
 
     return (

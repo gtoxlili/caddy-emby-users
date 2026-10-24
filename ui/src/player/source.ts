@@ -9,6 +9,7 @@ import type { PlayMethod } from '../api/emby'
 import { capabilities, localAudio, localVideo, nativeAudio } from '../api/profile'
 import type { MediaSource, MediaStream, PlaybackInfo } from '../api/types'
 import { codecName } from '../components/specs'
+import { ANDROID, IOS } from './engine'
 
 export interface TextTrack {
     index: number
@@ -41,6 +42,11 @@ export interface Source {
     notes: string[]
     /** Something the person should hear about when playback starts. */
     warning: string | null
+    /**
+     * Set when the page could not play the file itself and handed it to the browser's own
+     * player on the chance that it copes: why the page could not.
+     */
+    guess: string | null
 }
 
 export class NoStream extends Error {
@@ -128,6 +134,7 @@ export function chooseSource(info: PlaybackInfo, itemId: string, want: { audio?:
         burnedIn: null,
         reasons: [],
         warning: null,
+        guess: null,
     }
 
     let refusal: string | null = null
@@ -157,7 +164,11 @@ export function chooseSource(info: PlaybackInfo, itemId: string, want: { audio?:
             }
         }
         if (!c.local) {
-            refusal = '这个浏览器没有网页播放需要的 MSE，打不开这种文件。iPhone 要 iOS 17.1 以上。'
+            refusal = IOS
+                ? '这台 iPhone 的系统低于 iOS 17.1，网页里没有播放这种文件要用的 MSE。'
+                : ANDROID
+                  ? '这个浏览器关掉了网页播放要用的 MSE，手机自带的浏览器和 App 里的浏览器常这样。'
+                  : '这个浏览器没有网页播放要用的 MSE。'
         } else if (!LOCAL_CONTAINERS.has(container)) {
             refusal = `浏览器打不开 ${container.toUpperCase() || '这种'} 封装的文件。`
         } else if (picture && !localVideo(picture)) {
@@ -186,6 +197,23 @@ export function chooseSource(info: PlaybackInfo, itemId: string, want: { audio?:
                 notes,
                 warning: audioNote,
             }
+        }
+    }
+    if (!transcoding && refusal) {
+        // Nothing the page can do and nothing from the server: the browser's own player gets
+        // the file as it is. Android browsers that hide MSE hand video to the phone's player,
+        // which often plays MKV and Dolby sound; when it cannot, the error says why.
+        const audios = media.MediaStreams.filter(s => s.Type === 'Audio')
+        return {
+            ...base,
+            url: staticUrl(itemId, media, info.PlaySessionId),
+            delivery: 'file',
+            method: 'DirectPlay',
+            audio: (audios.find(s => s.IsDefault) ?? audios[0])?.Index,
+            tracks,
+            embedded,
+            notes: ['网页没法自己处理这个文件，交给浏览器自带的播放器'],
+            guess: refusal,
         }
     }
     if (!transcoding) throw new NoStream('NoCompatibleStream', refusal)

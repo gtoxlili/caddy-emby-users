@@ -25,6 +25,7 @@ const IOS =
     typeof navigator !== 'undefined' &&
     (/iP(hone|ad|od)/.test(navigator.userAgent) ||
         (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1))
+const ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
 
 export type FatalKind = 'network' | 'decode' | 'unsupported'
 
@@ -94,4 +95,4 @@ export async function attach(
     }
 }
 
-export { IOS, SAFARI }
+export { ANDROID, IOS, SAFARI }
