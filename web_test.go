@@ -11,9 +11,19 @@ import (
 
 var assetRef = regexp.MustCompile(`(?:src|href)="(/web/[^"]+)"`)
 
+// needsWebBuild skips tests of the web client in a checkout where ui/ has not
+// been built. CI builds it before running them.
+func needsWebBuild(t *testing.T) {
+	t.Helper()
+	if !webBuilt() {
+		t.Skip("ui/dist holds no build; run pnpm build in ui/")
+	}
+}
+
 // The web client owns /web/: the entry page answers every client route, and
 // every file it references is served from the embedded build.
 func TestWebClientIsServed(t *testing.T) {
+	needsWebBuild(t)
 	h := newHarness(t)
 
 	noFollow := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
@@ -66,6 +76,7 @@ func TestWebClientIsServed(t *testing.T) {
 // (connectionmanager.js, resolveIfAvailable). The handler answers the first
 // two; the strings file stays the upstream server's.
 func TestEmbyAppProbesStillAnswer(t *testing.T) {
+	needsWebBuild(t)
 	h := newHarness(t)
 
 	m := h.do(http.MethodGet, "/emby/web/manifest.json", "")
@@ -101,6 +112,7 @@ func TestEmbyAppProbesStillAnswer(t *testing.T) {
 // Precompressed files go to clients that accept brotli, with a matching
 // Content-Length, and revalidation by ETag costs no body.
 func TestWebAssetsNegotiateEncodingAndRevalidate(t *testing.T) {
+	needsWebBuild(t)
 	h := newHarness(t)
 	var target string
 	for name, f := range webFiles() {

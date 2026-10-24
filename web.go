@@ -16,9 +16,11 @@ import (
 	"github.com/gtoxlili/caddy-emby-users/internal/jsonx"
 )
 
-// The web client (ui/) is built into ui/dist and compiled into the module, so
-// xcaddy builds need no Node toolchain. It takes over /web/, where Emby keeps
-// its own web app, and / redirects there as on Emby.
+// The web client (ui/) is built into ui/dist by CI, which tags a release
+// commit carrying the build, so xcaddy builds of a release need no Node
+// toolchain. It takes over /web/, where Emby keeps its own web app, and /
+// redirects there as on Emby. Source checkouts have only a placeholder in
+// ui/dist; built from one, the plugin leaves /web/ to the upstream server.
 //
 //go:embed all:ui/dist
 var dist embed.FS
@@ -37,7 +39,7 @@ var webFiles = sync.OnceValue(func() map[string]*webFile {
 	}
 	files := map[string]*webFile{}
 	fs.WalkDir(root, ".", func(name string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() || strings.HasSuffix(name, ".br") {
+		if err != nil || d.IsDir() || strings.HasSuffix(name, ".br") || name == ".gitkeep" {
 			return err
 		}
 		body, err := fs.ReadFile(root, name)
@@ -54,6 +56,9 @@ var webFiles = sync.OnceValue(func() map[string]*webFile {
 	})
 	return files
 })
+
+// webBuilt reports whether this binary carries the web client.
+func webBuilt() bool { return webFiles()["index.html"] != nil }
 
 func contentType(name string) string {
 	switch path.Ext(name) {
@@ -94,7 +99,7 @@ const (
 // index.html and manifest.json, before they connect, and Emby answers API calls
 // such as /web/ConfigurationPages there, which must never get an HTML 200.
 func webRoute(rc *reqCtx) handlerFunc {
-	if m := rc.r.Method; m != http.MethodGet && m != http.MethodHead {
+	if m := rc.r.Method; (m != http.MethodGet && m != http.MethodHead) || !webBuilt() {
 		return nil
 	}
 	if len(rc.segs) == 0 {

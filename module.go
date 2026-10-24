@@ -131,6 +131,9 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 	}
 	h.ctx, h.cancel = context.WithCancel(ctx)
 	h.log = ctx.Logger()
+	if !webBuilt() {
+		h.log.Info("built without the web client; /web/ goes to the upstream server")
+	}
 	h.ready = make(chan struct{})
 	owner, err := ctx.App("emby_users")
 	if err != nil {

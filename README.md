@@ -11,6 +11,11 @@ Caddy 2.11.7+. Pure Go SQLite; no cgo required.
 xcaddy build v2.11.7 --with github.com/gtoxlili/caddy-emby-users
 ```
 
+This resolves to the newest release tag; pin one with `@vX.Y.Z`. CI tags a release for
+every tested commit on main, on a commit that adds the built web client; main itself
+holds only its source. A build from a main commit works but has no web client and leaves
+`/web/` to the upstream server.
+
 ## Configure
 
 ```caddyfile
@@ -60,15 +65,18 @@ app on this site; Emby's apps and the files they check under `/web/` keep workin
   subtitles (PGS, VobSub) are burned into a transcode.
 - Administrators manage accounts and devices at `/web/manage`.
 
-The built client lives in `ui/dist` and is embedded in the module, so `xcaddy` needs no
-Node toolchain. To work on it (Node 24+, pnpm), run Caddy with the plugin and:
+The client is source in `ui/`; CI builds it into release tags. To work on it (Node 26,
+pnpm), run Caddy with the plugin and:
 
 ```sh
 cd ui
 pnpm install
 EMBY_USERS_DEV_API=http://127.0.0.1:8080 pnpm dev   # the Caddy site
-pnpm check && pnpm build                              # commit ui/dist with the change
+pnpm check
 ```
+
+`pnpm build` writes `ui/dist`, which git ignores; it is only needed to embed the client in
+a binary built from source.
 
 ## Accounts
 
@@ -108,10 +116,12 @@ Emby API endpoints, which also work with a local administrator token:
 ## Test
 
 ```sh
+(cd ui && pnpm check && pnpm build)
 go vet ./...
 go test -race ./...
-(cd ui && pnpm check)
 ```
+
+Without a build in `ui/dist` the web client tests are skipped.
 
 Includes real Caddy validation/reload, TLS transport, Range and cancellation tests.
 

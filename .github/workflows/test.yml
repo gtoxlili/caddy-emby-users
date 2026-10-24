@@ -5,16 +5,6 @@ on:
   pull_request:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - run: go vet ./...
-      - run: go test -race ./...
-
   ui:
     runs-on: ubuntu-latest
     defaults:
@@ -25,7 +15,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: ui/package.json
-      # The same Node as local builds: the brotli siblings in dist come from Node's zlib.
       - uses: actions/setup-node@v4
         with:
           node-version: 26
@@ -34,6 +23,61 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm build
-      # The module embeds ui/dist; a build left out of a commit would ship the old client.
-      - name: ui/dist matches the source
-        run: git diff --exit-code -- dist && test -z "$(git status --porcelain -- dist)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-client
+          path: ui/dist
+          if-no-files-found: error
+
+  test:
+    needs: ui
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The tests serve the very build a release carries.
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-client
+          path: ui/dist
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test -race ./...
+
+  # xcaddy compiles module source and runs no Node, and main tracks no build. Each
+  # tested push to main becomes a release tag on a commit that adds the built client
+  # to that main commit; the commit is reachable only from its tag.
+  release:
+    needs: [ui, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-client
+          path: ui/dist
+      - name: Tag a release carrying the web client
+        run: |
+          latest=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+          if [ -z "$latest" ]; then
+            next=v0.1.0
+          else
+            IFS=. read -r major minor patch <<< "${latest#v}"
+            next="v${major}.${minor}.$((patch + 1))"
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --force ui/dist
+          git commit --quiet --message "chore: build web client for ${GITHUB_SHA::7}"
+          git tag "$next"
+          git push origin "$next"
+          echo "Released $next for ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"

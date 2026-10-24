@@ -1,2 +1,5 @@
 node_modules
 *.tsbuildinfo
+# Built by CI into release tags; only the placeholder go:embed needs is tracked.
+dist/*
+!dist/.gitkeep
