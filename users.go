@@ -201,6 +201,9 @@ func (a *app) userDTO(ctx context.Context, u *store.User) (*jsonx.Object, error)
 		"HasConfiguredEasyPassword", false,
 		"EnableAutoLogin", false,
 	)
+	if a.avatar != nil {
+		dto.Set("PrimaryImageTag", a.avatar.tag)
+	}
 	last := u.Created
 	if u.LastLogin > 0 {
 		dto.Set("LastLoginDate", embyDate(u.LastLogin))

@@ -17,8 +17,9 @@ import (
 // app combines shared local state with one immutable upstream configuration.
 type app struct {
 	*localState
-	log *zap.Logger
-	up  *upstream
+	log    *zap.Logger
+	up     *upstream
+	avatar *avatar
 }
 
 // Only local state is shared across overlapping Caddy configurations.
@@ -183,6 +184,8 @@ func publicRoute(rc *reqCtx) handlerFunc {
 		return (*app).systemInfo
 	case match(s, "system/endpoint"):
 		return (*app).systemEndpoint
+	case (m == http.MethodGet || m == http.MethodHead) && (match(s, "users/*/images/*") || match(s, "users/*/images/*/*")):
+		return (*app).userImage
 	}
 	return nil
 }
@@ -223,8 +226,6 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 		h = (*app).setConfiguration
 	case post && match(s, "users/*/configuration/partial"):
 		h = (*app).patchConfiguration
-	case get && match(s, "users/*/images/*"), get && match(s, "users/*/images/*/*"):
-		h = (*app).notFound
 
 	// Play state.
 	case (post || del) && match(s, "users/*/playeditems/*"), post && match(s, "users/*/playeditems/*/delete"):

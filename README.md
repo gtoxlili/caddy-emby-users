@@ -42,6 +42,7 @@ above. Keep the existing database path.
 | `device_id` | Generated once, saved in SQLite |
 | `client_version` | `4.8.11.0` |
 | `user_agent` | Windows / Chrome 131 browser UA |
+| `user_image` | None. A picture file every local account shows as its own, served without a token at `/Users/{id}/Images/Primary`; clients that use the user's picture as the server icon (Lenna) show it as the site's icon |
 | `transport` | [Caddy HTTP](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#the-http-transport); response header timeout 30s |
 
 Identity defaults stay fixed across upgrades. Custom profiles should set all

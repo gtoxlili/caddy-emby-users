@@ -22,6 +22,7 @@ import (
 //		device_id <id>
 //		client_version <version>
 //		user_agent <value>
+//		user_image <file>
 //		transport http { ... }
 //	}
 func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
@@ -75,6 +76,8 @@ func (h *Handler) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 			h.ClientVersion = val
 		case "user_agent":
 			h.UserAgent = val
+		case "user_image":
+			h.UserImage = val
 		default:
 			return d.Errf("unknown emby_users option %q", key)
 		}

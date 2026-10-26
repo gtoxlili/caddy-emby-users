@@ -75,7 +75,7 @@ func (h *Handler) initApp(ctx context.Context) error {
 	}
 	up := newUpstream(upstreamConfig{base: *h.base, username: h.Username, password: h.Password, id: id}, local.st, h.log, h.transport)
 	up.loginMu = &local.loginMu
-	h.app = &app{localState: local, up: up, log: h.log}
+	h.app = &app{localState: local, up: up, log: h.log, avatar: h.avatar}
 	h.key = h.Database
 	return nil
 }

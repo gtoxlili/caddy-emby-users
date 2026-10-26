@@ -1,9 +1,12 @@
 package embyusers
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -442,6 +445,7 @@ func TestCaddyfile(t *testing.T) {
 		device_id gateway
 		client_version 9.8.7
 		user_agent "ConfiguredPlayer/42"
+		user_image /etc/caddy/avatar.jpg
 	}`)
 	var got Handler
 	if err := got.UnmarshalCaddyfile(d); err != nil {
@@ -449,12 +453,42 @@ func TestCaddyfile(t *testing.T) {
 	}
 	want := Handler{Upstream: "https://emby.example.com", Username: "{env.EMBY_USERNAME}", Password: "{env.EMBY_PASSWORD}",
 		Database: "/data/emby-users.db", ClientName: "Emby", DeviceName: "Home", DeviceID: "gateway",
-		ClientVersion: "9.8.7", UserAgent: "ConfiguredPlayer/42"}
+		ClientVersion: "9.8.7", UserAgent: "ConfiguredPlayer/42", UserImage: "/etc/caddy/avatar.jpg"}
 	if !reflect.DeepEqual(&got, &want) {
 		t.Errorf("got %+v", &got)
 	}
 	if err := new(Handler).UnmarshalCaddyfile(caddyfile.NewTestDispenser("emby_users {\n bogus x\n}")); err == nil {
 		t.Error("unknown option accepted")
+	}
+}
+
+// upstream: Emby API, UserDto.PrimaryImageTag names the picture at
+// GET /Users/{Id}/Images/Primary, which Emby serves without a token. Lenna
+// 1.0.11 shows the signed-in user's picture as the server's icon.
+func TestEveryAccountShowsTheConfiguredPicture(t *testing.T) {
+	h := newHarness(t)
+	alice := h.signIn("alice")
+	if r := h.do("GET", "/emby/Users/"+alice.UserID+"/Images/Primary", ""); r.Status != http.StatusNotFound {
+		t.Fatalf("picture without user_image: %d", r.Status)
+	}
+	png := append([]byte("\x89PNG\r\n\x1a\n"), make([]byte, 64)...)
+	path := filepath.Join(t.TempDir(), "avatar.png")
+	if err := os.WriteFile(path, png, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var err error
+	if h.app.avatar, err = loadAvatar(path); err != nil {
+		t.Fatal(err)
+	}
+	bob := h.signIn("bob")
+	r := h.do(http.MethodPost, "/emby/Users/AuthenticateByName", `{"Username":"bob","Pw":"bob-pw"}`)
+	tag, _ := r.json(t)["User"].(map[string]any)["PrimaryImageTag"].(string)
+	if got := h.as(bob.Token, "GET", "/emby/Users/"+bob.UserID, "").json(t)["PrimaryImageTag"]; tag == "" || got != tag {
+		t.Fatalf("PrimaryImageTag at sign-in %q, from /Users/{id} %v", tag, got)
+	}
+	r = h.do("GET", "/emby/Users/"+alice.UserID+"/Images/Primary?tag="+tag+"&maxWidth=120", "")
+	if r.Status != http.StatusOK || r.Header.Get("Content-Type") != "image/png" || !bytes.Equal(r.Body, png) {
+		t.Fatalf("picture: %d %s, %d bytes", r.Status, r.Header.Get("Content-Type"), len(r.Body))
 	}
 }
 

@@ -39,6 +39,8 @@ type Handler struct {
 	DeviceID      string `json:"device_id,omitempty"`
 	ClientVersion string `json:"client_version,omitempty"`
 	UserAgent     string `json:"user_agent,omitempty"`
+	// UserImage is a picture file every local account shows as its own.
+	UserImage string `json:"user_image,omitempty"`
 	// Transport is a standard Caddy reverse-proxy transport. Both internal
 	// API calls and proxied media use this same provisioned instance.
 	TransportRaw json.RawMessage `json:"transport,omitempty" caddy:"namespace=http.reverse_proxy.transport inline_key=protocol"`
@@ -46,6 +48,7 @@ type Handler struct {
 	base      *url.URL
 	id        identity
 	transport http.RoundTripper
+	avatar    *avatar
 	proxy     *reverseproxy.Handler
 	ctx       context.Context
 	cancel    context.CancelFunc
@@ -77,7 +80,7 @@ func defaultDatabase() string { return filepath.Join(caddy.AppDataDir(), "emby-u
 func (h *Handler) Provision(ctx caddy.Context) error {
 	repl := caddy.NewReplacer()
 	for _, value := range []*string{&h.Upstream, &h.Username, &h.Password, &h.Database,
-		&h.ClientName, &h.DeviceName, &h.DeviceID, &h.ClientVersion, &h.UserAgent} {
+		&h.ClientName, &h.DeviceName, &h.DeviceID, &h.ClientVersion, &h.UserAgent, &h.UserImage} {
 		*value = repl.ReplaceAll(*value, "")
 	}
 	if h.Database == "" {
@@ -95,6 +98,9 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 	h.id = (identity{Client: h.ClientName, Device: h.DeviceName, DeviceID: h.DeviceID,
 		Version: h.ClientVersion, UserAgent: h.UserAgent}).defaults()
 	if err := h.Validate(); err != nil {
+		return err
+	}
+	if h.avatar, err = loadAvatar(h.UserImage); err != nil {
 		return err
 	}
 	if h.TransportRaw == nil {
