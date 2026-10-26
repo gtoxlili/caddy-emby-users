@@ -112,16 +112,14 @@ export function chooseSource(info: PlaybackInfo, itemId: string, want: { audio?:
     const media = info.MediaSources[0]
     if (!media) throw new NoStream('NoCompatibleStream')
     const token = encodeURIComponent(getToken() ?? '')
-    // Every text subtitle comes as WebVTT from Emby's converter, whatever PlaybackInfo
-    // decided: left to itself, Emby 4.10 burns embedded ASS into a full transcode.
+    // Every text subtitle comes as WebVTT from the server's converter, whatever PlaybackInfo
+    // decided: left to itself, Emby 4.10 burns embedded ASS into a full transcode. The plugin
+    // converts external files an upstream will not.
     const tracks: TextTrack[] = media.MediaStreams.filter(s => s.Type === 'Subtitle' && isTextSubtitle(s)).map(s => ({
         index: s.Index,
         label: s.Title || s.DisplayLanguage || s.DisplayTitle || `字幕 ${s.Index}`,
         lang: s.Language ?? '',
-        url:
-            s.DeliveryMethod === 'External' && s.DeliveryUrl
-                ? serverUrl(s.DeliveryUrl)
-                : `/emby/Videos/${itemId}/${encodeURIComponent(media.Id)}/Subtitles/${s.Index}/0/Stream.vtt?api_key=${token}`,
+        url: `/emby/Videos/${itemId}/${encodeURIComponent(media.Id)}/Subtitles/${s.Index}/0/Stream.vtt?api_key=${token}`,
     }))
     const embedded = media.MediaStreams.filter(s => s.Type === 'Subtitle' && !s.IsExternal)
     const transcoding = media.TranscodingUrl ? serverUrl(media.TranscodingUrl) : null

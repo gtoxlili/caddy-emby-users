@@ -3,43 +3,23 @@ import { cn } from '../cn'
 import type { EmbeddedSubtitles } from './engine'
 import type { PgsTrack } from './local/pgs'
 import { paint } from './local/pgs'
-import { toVtt } from './local/text'
 import { findLocalTrack } from './local-tracks'
 import type { TextTrack as SubTrack } from './source'
 
 /**
- * <track> elements for the subtitles the server sends, each with an id so its TextTrack can
- * be found again. A track is fetched once it is first chosen; whatever format the server
- * really sent (some send the original ASS or SubRip whatever was asked for) becomes WebVTT
- * in the page.
+ * <track> elements for the subtitles the server sends as WebVTT, each with an id so its
+ * TextTrack can be found again. A track joins once it is first chosen, so the others are
+ * never fetched.
  */
 export function Tracks({ tracks, selected }: { tracks: SubTrack[]; selected: number | null }) {
     return tracks.map(t => <ServerTrack key={t.url} track={t} wanted={selected === t.index} />)
 }
 
 function ServerTrack({ track: t, wanted }: { track: SubTrack; wanted: boolean }) {
-    const [src, setSrc] = useState<string | null>(null)
     const [asked, setAsked] = useState(wanted)
     if (wanted && !asked) setAsked(true)
-    useEffect(() => {
-        if (!asked) return
-        let url: string | null = null
-        let gone = false
-        fetch(t.url)
-            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`${r.status}`))))
-            .then(text => {
-                if (gone) return
-                url = URL.createObjectURL(new Blob([toVtt(text)], { type: 'text/vtt' }))
-                setSrc(url)
-            })
-            .catch(() => {})
-        return () => {
-            gone = true
-            if (url) URL.revokeObjectURL(url)
-        }
-    }, [asked, t.url])
-    if (!src) return null
-    return <track id={`sub-${t.index}`} kind="subtitles" src={src} label={t.label} srcLang={t.lang || undefined} />
+    if (!asked) return null
+    return <track id={`sub-${t.index}`} kind="subtitles" src={t.url} label={t.label} srcLang={t.lang || undefined} />
 }
 
 /**

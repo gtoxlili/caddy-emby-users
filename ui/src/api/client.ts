@@ -86,7 +86,7 @@ export function mediaUrl(path: string, params?: Query): string {
     return `/emby${path}${qs({ ...params, api_key: getToken() ?? undefined })}`
 }
 
-/** A path the server handed out (TranscodingUrl, DeliveryUrl) already carries its query and token. */
+/** A path the server handed out (TranscodingUrl) already carries its query and token. */
 export function serverUrl(path: string): string {
     return /^\/emby\//i.test(path) ? path : `/emby${path.startsWith('/') ? '' : '/'}${path}`
 }

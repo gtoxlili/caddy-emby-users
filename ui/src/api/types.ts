@@ -82,8 +82,6 @@ export interface MediaStream {
     IsExternal?: boolean
     IsTextSubtitleStream?: boolean
     SupportsExternalStream?: boolean
-    DeliveryMethod?: 'Encode' | 'Embed' | 'External' | 'Hls' | 'VideoSideData' | (string & {})
-    DeliveryUrl?: string
     Width?: number
     Height?: number
     BitRate?: number
