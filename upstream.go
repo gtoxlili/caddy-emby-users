@@ -249,12 +249,17 @@ func (u *upstream) url(path string, q url.Values) string {
 // do sends an authenticated request, signing in again once if the token was
 // rejected.
 func (u *upstream) do(ctx context.Context, method, path string, q url.Values, body []byte) (*http.Response, error) {
+	return u.send(ctx, method, u.url(path, q), body)
+}
+
+// send is do for a full URL on the upstream origin.
+func (u *upstream) send(ctx context.Context, method, target string, body []byte) (*http.Response, error) {
 	if err := u.ensure(ctx); err != nil {
 		return nil, err
 	}
 	for attempt := 0; ; attempt++ {
 		tok, _, _ := u.credentials()
-		req, err := http.NewRequestWithContext(ctx, method, u.url(path, q), bytes.NewReader(body))
+		req, err := http.NewRequestWithContext(ctx, method, target, bytes.NewReader(body))
 		if err != nil {
 			return nil, err
 		}

@@ -561,6 +561,15 @@ func (a *app) setPolicy(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) 
 // setConfiguration stores the account's display settings (autoplay, subtitle
 // mode, home screen order) for that account alone.
 func (a *app) setConfiguration(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) error {
+	return a.storeConfiguration(w, rc, false)
+}
+
+// patchConfiguration merges the fields given into the stored settings.
+func (a *app) patchConfiguration(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Handler) error {
+	return a.storeConfiguration(w, rc, true)
+}
+
+func (a *app) storeConfiguration(w http.ResponseWriter, rc *reqCtx, partial bool) error {
 	target, ok := a.target(w, rc)
 	if !ok {
 		return nil
@@ -574,6 +583,17 @@ func (a *app) setConfiguration(w http.ResponseWriter, rc *reqCtx, _ caddyhttp.Ha
 		return writeText(w, http.StatusBadRequest, "Body must be a JSON object.")
 	}
 	clean := jsonx.NewObject()
+	if partial {
+		stored, err := a.st.Pref(rc.ctx(), target.ID, prefConfiguration)
+		if err != nil {
+			return err
+		}
+		if cur, err := jsonx.Decode([]byte(stored)); err == nil {
+			if c, ok := cur.(*jsonx.Object); ok {
+				clean = c
+			}
+		}
+	}
 	mergeObject(clean, o)
 	raw, err := jsonx.Encode(clean)
 	if err != nil {

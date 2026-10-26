@@ -23,7 +23,9 @@ import (
 // The fake upstream mirrors the Emby-compatible server this plugin was first
 // deployed against (observed 2026-10): 26-character mixed-case ids, a short
 // ServerId, Ids and played filters ignored, streams under /play/video, no
-// /UserSettings, no WebSocket.
+// /UserSettings, no WebSocket, display preferences only for usersettings, and
+// subtitle streams that redirect to the original file under /play/subtitle
+// with an HTML body repeating the link.
 const (
 	upUser     = "01UPSTREAMUSER000000000000"
 	upServer   = "SRV"
@@ -47,6 +49,11 @@ type fakeUpstream struct {
 	logins   int
 	password string
 	requests []recorded
+	// playback replaces the PlaybackInfo document when set.
+	playback string
+	// files maps /play/subtitle ids to their content, or to an absolute URL
+	// the subtitle stream redirects to instead.
+	files map[string]string
 }
 
 var catalog = map[string]map[string]any{
@@ -56,8 +63,15 @@ var catalog = map[string]map[string]any{
 	"e01EP2":    episodeFixture("e01EP2", 2),
 	"e01EP3":    episodeFixture("e01EP3", 3),
 	"m01MOVIE":  {"Id": "m01MOVIE", "Name": "Movie", "Type": "Movie", "IsFolder": false, "MediaType": "Video", "RunTimeTicks": 2 * hour},
-	"c01SHOWS":  {"Id": "c01SHOWS", "Name": "Shows", "Type": "CollectionFolder", "CollectionType": "tvshows", "IsFolder": true},
-	"c01FILMS":  {"Id": "c01FILMS", "Name": "Films", "Type": "CollectionFolder", "CollectionType": "movies", "IsFolder": true},
+	// The upstream sends sources and streams without names.
+	"m01BARE": {"Id": "m01BARE", "Name": "Bare", "Type": "Movie", "IsFolder": false, "MediaType": "Video", "MediaSources": []any{map[string]any{
+		"Id": "ms1", "Container": "mkv", "MediaStreams": []any{
+			map[string]any{"Index": 0, "Type": "Video", "Codec": "hevc", "Width": 3840, "Height": 1600},
+			map[string]any{"Index": 1, "Type": "Audio", "Codec": "aac", "Language": "chi", "ChannelLayout": "stereo"},
+			map[string]any{"Index": 2, "Type": "Subtitle", "Codec": "srt", "DisplayTitle": "简体中文"},
+		}}}},
+	"c01SHOWS": {"Id": "c01SHOWS", "Name": "Shows", "Type": "CollectionFolder", "CollectionType": "tvshows", "IsFolder": true},
+	"c01FILMS": {"Id": "c01FILMS", "Name": "Films", "Type": "CollectionFolder", "CollectionType": "movies", "IsFolder": true},
 }
 
 var libraries = map[string][]string{
@@ -200,6 +214,21 @@ func (f *fakeUpstream) serve(w http.ResponseWriter, r *http.Request) {
 		writeFakeJSON(w, map[string]any{"Items": items, "TotalRecordCount": len(items)})
 	case len(segs) == 3 && strings.EqualFold(segs[0], "shows") && strings.EqualFold(segs[2], "episodes"):
 		writeFakeJSON(w, map[string]any{"Items": []any{dto("e01EP1"), dto("e01EP2"), dto("e01EP3")}, "TotalRecordCount": 3})
+	case len(segs) == 3 && strings.EqualFold(segs[0], "items") && strings.EqualFold(segs[2], "playbackinfo") && f.playback != "":
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		io.WriteString(w, f.playback)
+	case (len(segs) == 6 || len(segs) == 7) && segs[0] == "Videos" && segs[3] == "Subtitles" && strings.HasPrefix(segs[len(segs)-1], "Stream."):
+		target := "http://" + r.Host + "/play/subtitle/" + segs[4] + "?api_key=" + tok
+		if dest, ok := f.files[segs[4]]; ok && strings.HasPrefix(dest, "http") {
+			target = dest + "?api_key=" + tok
+		}
+		w.Header().Set("Location", target)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusFound)
+		fmt.Fprintf(w, "<a href=%q>Found</a>.\n", target)
+	case len(segs) == 3 && segs[0] == "play" && segs[1] == "subtitle" && f.files[segs[2]] != "":
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		io.WriteString(w, f.files[segs[2]])
 	case len(segs) == 3 && strings.EqualFold(segs[0], "items") && strings.EqualFold(segs[2], "playbackinfo"):
 		writeFakeJSON(w, map[string]any{"PlaySessionId": "ps1", "MediaSources": []any{map[string]any{
 			"Id": "ms1", "Protocol": "File", "Path": "Episode 1",
@@ -219,7 +248,7 @@ func (f *fakeUpstream) serve(w http.ResponseWriter, r *http.Request) {
 	case low == "/videos/large/master.m3u8":
 		w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
 		w.Write([]byte(strings.Repeat("x", 16<<20+1)))
-	case strings.HasPrefix(low, "/displaypreferences/"):
+	case low == "/displaypreferences/usersettings":
 		writeFakeJSON(w, map[string]any{"Id": segs[1], "SortBy": "SortName", "CustomPrefs": map[string]any{}})
 	default:
 		// /UserSettings and others are missing upstream; nginx answers.
@@ -297,6 +326,9 @@ func (r response) json(t *testing.T) map[string]any {
 	return m
 }
 
+// noRedirects shows the handler's own responses, redirects included.
+var noRedirects = &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+
 // do sends a request; headers are alternating name, value pairs.
 func (h *harness) do(method, path, body string, headers ...string) response {
 	h.t.Helper()
@@ -310,7 +342,7 @@ func (h *harness) do(method, path, body string, headers ...string) response {
 	for i := 0; i+1 < len(headers); i += 2 {
 		req.Header.Set(headers[i], headers[i+1])
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := noRedirects.Do(req)
 	if err != nil {
 		h.t.Fatal(err)
 	}

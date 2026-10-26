@@ -221,6 +221,8 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 		h = (*app).setPolicy
 	case post && match(s, "users/*/configuration"):
 		h = (*app).setConfiguration
+	case post && match(s, "users/*/configuration/partial"):
+		h = (*app).patchConfiguration
 	case get && match(s, "users/*/images/*"), get && match(s, "users/*/images/*/*"):
 		h = (*app).notFound
 
@@ -250,6 +252,12 @@ func (a *app) dispatch(w http.ResponseWriter, rc *reqCtx, next caddyhttp.Handler
 		h = (*app).latest
 	case get && (match(s, "users/*/items") || match(s, "items") || match(s, "shows/*/episodes") || match(s, "shows/*/seasons")):
 		h = (*app).items
+
+	// Playback.
+	case (get || post) && match(s, "items/*/playbackinfo"):
+		h = (*app).playbackInfo
+	case get && isSubtitleStream(s):
+		h = (*app).subtitleStream
 
 	// Per-user preferences.
 	case match(s, "usersettings/*"), match(s, "usersettings/*/partial"):
@@ -312,7 +320,7 @@ func upstreamManagement(s []string) bool {
 // start or stop a stream and change nothing the account keeps.
 func forwardable(method string, s []string) bool {
 	switch {
-	case match(s, "items/*/playbackinfo"), match(s, "livestreams/open"), match(s, "livestreams/close"), match(s, "livestreams/mediainfo"):
+	case match(s, "livestreams/open"), match(s, "livestreams/close"), match(s, "livestreams/mediainfo"):
 		return method == http.MethodPost
 	case match(s, "videos/activeencodings"):
 		return method == http.MethodDelete

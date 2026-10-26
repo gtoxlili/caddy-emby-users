@@ -53,6 +53,27 @@ leaves it untouched; startup opens it. Reloads preserve local session and playba
 state. Passwords use Argon2id, local tokens use SHA-256 hashes, and the upstream
 access token is stored in the database.
 
+## Restricted upstreams
+
+Clients see a complete Emby server even when the upstream sits behind a proxy that
+accepts only part of the API, as some hosted services do:
+
+- Forwarded paths take the official spelling of Emby's API templates; parameters keep
+  their text. Emby matches paths case-insensitively and some clients send them
+  lowercased. The templates in `routes.txt` come from the official SDK's OpenAPI
+  document (`scripts/gen_routes.py`).
+- Reads that clients load without error handling answer empty when the upstream refuses
+  them: the language list (Emby's ISO 639-2 table in `cultures.json`,
+  `scripts/gen_cultures.py`), special features, local trailers, home section items and
+  display preferences.
+- External text subtitles (SRT, ASS, SSA, WebVTT; UTF-8, UTF-16 or GBK) are converted to
+  the `Stream.json`, `.srt` or `.vtt` the client asks for when the upstream redirects to
+  the original file instead.
+- Sources and streams the upstream leaves unnamed get Emby's titles. PlaybackInfo's
+  default audio and subtitle streams follow the streams named in the request, then the
+  caller's own language settings once they save any.
+- Redirect bodies are dropped; the Location carries the caller's token.
+
 ## Web client
 
 Browsers get a web client at `/web/`; `/` redirects there. It replaces Emby's own web
@@ -67,8 +88,8 @@ app on this site; Emby's apps and the files they check under `/web/` keep workin
   iPhone needs iOS 17.1. What the browser cannot decode at all (TrueHD, HEVC without
   hardware support) goes to an upstream HLS transcode where the server offers one;
   without one, a TrueHD-only file plays without sound.
-- External subtitles are fetched and converted to WebVTT in the page; VobSub is
-  burned into a transcode where the server offers one.
+- Text subtitles come from the server as WebVTT; VobSub is burned into a transcode
+  where the server offers one.
 - Administrators manage accounts and devices at `/web/manage`.
 
 The client is source in `ui/`; CI builds it into release tags. To work on it (Node 26,

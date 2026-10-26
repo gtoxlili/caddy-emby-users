@@ -68,6 +68,7 @@ func (t *upstreamTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 			tok, uid, _ = a.up.credentials()
 		}
 		out := r.Clone(r.Context())
+		canonicalize(out.URL)
 		if r.GetBody != nil {
 			body, err := r.GetBody()
 			if err != nil {
@@ -108,6 +109,13 @@ func (t *upstreamTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 			}
 			return textResponse(out, http.StatusBadGateway, "Upstream rejected the configured account."), nil
 		}
+		if (out.Method == http.MethodGet || out.Method == http.MethodHead) && rc.user != nil &&
+			(resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusMethodNotAllowed) {
+			if body := refusedRead(rc); body != nil {
+				resp.Body.Close()
+				return jsonResponse(out, body), nil
+			}
+		}
 		if err := call.rewrite(resp, tok, uid); err != nil {
 			resp.Body.Close()
 			return nil, err
@@ -141,6 +149,15 @@ func (c *forwardCall) rewrite(resp *http.Response, token, userID string) error {
 		if value := resp.Header.Get(key); value != "" {
 			resp.Header.Set(key, string(c.localize([]byte(value), token, userID)))
 		}
+	}
+	if resp.StatusCode/100 == 3 && resp.Header.Get("Location") != "" {
+		// The body of a redirect repeats its target, upstream origin and token
+		// included (an HTML "Found" link). Clients follow the header alone.
+		resp.Body.Close()
+		resp.Body, resp.ContentLength = http.NoBody, 0
+		resp.Header.Set("Content-Length", "0")
+		resp.Header.Del("Content-Type")
+		return nil
 	}
 	ct := strings.ToLower(resp.Header.Get("Content-Type"))
 	if c.rc.user == nil || c.rc.r.Method == http.MethodHead ||
@@ -177,6 +194,7 @@ func (c *forwardCall) rewrite(resp *http.Response, token, userID string) error {
 		if err := c.a.overlay(c.rc.ctx(), c.rc.owner.ID, doc); err != nil {
 			return err
 		}
+		fillMediaTitles(doc)
 		if c.post != nil {
 			doc, err = c.post(c.rc.ctx(), c.rc, doc)
 			if err != nil {
