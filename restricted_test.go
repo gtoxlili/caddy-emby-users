@@ -78,8 +78,10 @@ func TestRedirectBodiesDoNotCarryTheUpstreamToken(t *testing.T) {
 
 // upstream: the observed proxy answers 404 for these reads. Clients call them
 // without handling errors: Emby for Android TV leaves its language pickers
-// empty, raises an error toast on every detail page, and spins a home row
-// forever on /Sections/null/Items.
+// empty, raises an error toast on every detail page ("Error retrieving
+// upcoming items" on a series, 2026-10-28), and spins a home row forever on
+// /Sections/null/Items. Empty answers take the shapes of Emby's OpenAPI
+// document.
 func TestRefusedReadsAnswerEmpty(t *testing.T) {
 	h := newHarness(t)
 	alice := h.signIn("alice")
@@ -88,6 +90,13 @@ func TestRefusedReadsAnswerEmpty(t *testing.T) {
 		{u + "/Items/m01MOVIE/SpecialFeatures", `[]`},
 		{u + "/Items/m01MOVIE/LocalTrailers", `[]`},
 		{u + "/Sections/null/Items", `{"Items":[],"TotalRecordCount":0}`},
+		{"/emby/Shows/Upcoming?ParentId=m01SERIES&UserId=" + alice.UserID, `{"Items":[],"TotalRecordCount":0}`},
+		{u + "/Items/e01EP1/Intros", `{"Items":[],"TotalRecordCount":0}`},
+		{"/emby/Items/m01MOVIE/ThemeSongs", `{"Items":[],"TotalRecordCount":0,"OwnerId":0}`},
+		{"/emby/Items/m01MOVIE/ThemeMedia", `{"ThemeVideosResult":{"Items":[],"TotalRecordCount":0,"OwnerId":0},` +
+			`"ThemeSongsResult":{"Items":[],"TotalRecordCount":0,"OwnerId":0},` +
+			`"SoundtrackSongsResult":{"Items":[],"TotalRecordCount":0,"OwnerId":0}}`},
+		{"/emby/LiveTv/Info", `{"IsEnabled":false,"EnabledUsers":[]}`},
 	} {
 		if r := h.as(alice.Token, "GET", c.path, ""); r.Status != http.StatusOK || strings.TrimSpace(string(r.Body)) != c.want {
 			t.Errorf("%s: %d %s", c.path, r.Status, r.Body)

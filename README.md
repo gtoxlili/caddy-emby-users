@@ -66,8 +66,9 @@ accepts only part of the API, as some hosted services do:
   official SDK's OpenAPI document (`scripts/gen_routes.py`).
 - Reads that clients load without error handling answer empty when the upstream refuses
   them: the language list (Emby's ISO 639-2 table in `cultures.json`,
-  `scripts/gen_cultures.py`), special features, local trailers, home section items and
-  display preferences.
+  `scripts/gen_cultures.py`), special features, local trailers, home section items,
+  display preferences, upcoming and missing episodes, theme media, critic reviews, intros,
+  instant mixes, channels and live TV.
 - External text subtitles (SRT, ASS, SSA, WebVTT; UTF-8, UTF-16 or GBK) are converted to
   the `Stream.json`, `.srt` or `.vtt` the client asks for when the upstream redirects to
   the original file instead.
