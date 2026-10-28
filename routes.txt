@@ -1,28 +1,28 @@
-# Emby 4.10.2.0 API path templates from the official SDK's Resources/OpenApi/openapi_v3.json (scripts/gen_routes.py)
-/Albums/{Id}/InstantMix
-/Albums/{Id}/Similar
-/Artists
-/Artists/AlbumArtists
-/Artists/InstantMix
-/Artists/Prefixes
-/Artists/{Id}/Similar
-/Artists/{Name}
-/Artists/{Name}/Images/{Type}
-/Artists/{Name}/Images/{Type}/{Index}
+# Emby 4.10.2.0 API path templates, each followed by its query parameters, from the official SDK's Resources/OpenApi/openapi_v3.json (scripts/gen_routes.py)
+/Albums/{Id}/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Albums/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Artists AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Artists/AlbumArtists AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Artists/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Artists/Prefixes AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Artists/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Artists/{Name} UserId
+/Artists/{Name}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Artists/{Name}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
 /Audio/{Id}/hls/{PlaylistId}/{SegmentId}.{SegmentContainer}
 /Audio/{Id}/hls1/{PlaylistId}/{SegmentId}.{SegmentContainer}
-/Audio/{Id}/live.m3u8
-/Audio/{Id}/main.m3u8
-/Audio/{Id}/master.m3u8
-/Audio/{Id}/stream
-/Audio/{Id}/stream.{Container}
-/Audio/{Id}/universal
-/Audio/{Id}/universal.{Container}
-/Audio/{Id}/{StreamFileName}
-/AudioBooks/NextUp
-/AudioCodecs
-/AudioLayouts
-/Auth/Keys
+/Audio/{Id}/live.m3u8 AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Audio/{Id}/main.m3u8 AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Audio/{Id}/master.m3u8 AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Audio/{Id}/stream AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Audio/{Id}/stream.{Container} AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Audio/{Id}/universal DeviceId StartTimeTicks
+/Audio/{Id}/universal.{Container} DeviceId StartTimeTicks
+/Audio/{Id}/{StreamFileName} AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/AudioBooks/NextUp AlbumId EnableImages EnableImageTypes EnableUserData Fields ImageTypeLimit Limit ParentId StartIndex UserId
+/AudioCodecs AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/AudioLayouts AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Auth/Keys App Limit StartIndex
 /Auth/Keys/{Key}
 /Auth/Keys/{Key}/Delete
 /Auth/Providers
@@ -32,27 +32,27 @@
 /Branding/Configuration
 /Branding/Css
 /Branding/Css.css
-/Channels
-/Collections
-/Collections/{Id}/Items
-/Collections/{Id}/Items/Delete
-/Collections/{Id}/Missing
-/Collections/{Id}/ProviderItems
-/Connect/Exchange
+/Channels AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Collections Ids IsLocked Name ParentId
+/Collections/{Id}/Items Ids
+/Collections/{Id}/Items/Delete Ids
+/Collections/{Id}/Missing AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Collections/{Id}/ProviderItems AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Connect/Exchange ConnectUserId
 /Connect/Pending
-/Containers
-/Devices
-/Devices/CameraUploads
-/Devices/Delete
-/Devices/Info
-/Devices/Options
-/DisplayPreferences/{DisplayPreferencesId}
-/DisplayPreferences/{Id}
+/Containers AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Devices Id SortOrder
+/Devices/CameraUploads Album Id Name
+/Devices/Delete Id
+/Devices/Info Id
+/Devices/Options Id
+/DisplayPreferences/{DisplayPreferencesId} UserId
+/DisplayPreferences/{Id} Client UserId
 /Dlna/ProfileInfos
 /Dlna/Profiles
 /Dlna/Profiles/Default
 /Dlna/Profiles/{Id}
-/Dlna/icons/{Filename}
+/Dlna/icons/{Filename} UuId
 /Dlna/{UuId}/connectionmanager/connectionmanager
 /Dlna/{UuId}/connectionmanager/connectionmanager.xml
 /Dlna/{UuId}/connectionmanager/control
@@ -64,44 +64,44 @@
 /Dlna/{UuId}/icons/{Filename}
 /Encoding/CodecConfiguration/Defaults
 /Encoding/CodecInformation/Video
-/Encoding/CodecParameters
+/Encoding/CodecParameters CodecId ParameterContext
 /Encoding/FfmpegOptions
 /Encoding/FullToneMapOptions
 /Encoding/PublicToneMapOptions
 /Encoding/SubtitleOptions
 /Encoding/ToneMapOptions
 /Environment/DefaultDirectoryBrowser
-/Environment/DirectoryContents
+/Environment/DirectoryContents IncludeDirectories IncludeFiles Path
 /Environment/Drives
 /Environment/NetworkDevices
-/Environment/NetworkShares
-/Environment/ParentPath
-/Environment/ValidatePath
-/ExtendedVideoTypes
+/Environment/NetworkShares Path
+/Environment/ParentPath Path
+/Environment/ValidatePath Path
+/ExtendedVideoTypes AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /Features
-/GameGenres
-/GameGenres/{Name}
-/GameGenres/{Name}/Images/{Type}
-/GameGenres/{Name}/Images/{Type}/{Index}
-/Games/{Id}/Similar
-/Genres
-/Genres/{Name}
-/Genres/{Name}/Images/{Type}
-/Genres/{Name}/Images/{Type}/{Index}
-/Images/Remote
-/ItemTypes
-/Items
+/GameGenres AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/GameGenres/{Name} UserId
+/GameGenres/{Name}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/GameGenres/{Name}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Games/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Genres AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Genres/{Name} UserId
+/Genres/{Name}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Genres/{Name}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Images/Remote ImageUrl
+/ItemTypes AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Items AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /Items/Access
-/Items/Counts
-/Items/Delete
+/Items/Counts IsFavorite UserId
+/Items/Delete Ids
 /Items/Intros
-/Items/Metadata/Reset
-/Items/Prefixes
-/Items/RemoteSearch/Apply/{Id}
+/Items/Metadata/Reset ItemIds
+/Items/Prefixes AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Items/RemoteSearch/Apply/{Id} ReplaceAllImages
 /Items/RemoteSearch/Book
 /Items/RemoteSearch/BoxSet
 /Items/RemoteSearch/Game
-/Items/RemoteSearch/Image
+/Items/RemoteSearch/Image ImageUrl ProviderName
 /Items/RemoteSearch/Movie
 /Items/RemoteSearch/MusicAlbum
 /Items/RemoteSearch/MusicArtist
@@ -111,47 +111,47 @@
 /Items/RemoteSearch/Trailer
 /Items/Shared/Leave
 /Items/{Id}
-/Items/{Id}/Ancestors
-/Items/{Id}/CriticReviews
+/Items/{Id}/Ancestors UserId
+/Items/{Id}/CriticReviews Limit StartIndex
 /Items/{Id}/Delete
 /Items/{Id}/DeleteInfo
 /Items/{Id}/Download
 /Items/{Id}/ExternalIdInfos
 /Items/{Id}/File
 /Items/{Id}/Images
-/Items/{Id}/Images/{Type}
-/Items/{Id}/Images/{Type}/Delete
-/Items/{Id}/Images/{Type}/{Index}
+/Items/{Id}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Items/{Id}/Images/{Type}/Delete Index
+/Items/{Id}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
 /Items/{Id}/Images/{Type}/{Index}/Delete
-/Items/{Id}/Images/{Type}/{Index}/Index
-/Items/{Id}/Images/{Type}/{Index}/Url
-/Items/{Id}/Images/{Type}/{Index}/{Tag}/{Format}/{MaxWidth}/{MaxHeight}/{PercentPlayed}/{UnPlayedCount}
-/Items/{Id}/InstantMix
+/Items/{Id}/Images/{Type}/{Index}/Index NewIndex
+/Items/{Id}/Images/{Type}/{Index}/Url Url
+/Items/{Id}/Images/{Type}/{Index}/{Tag}/{Format}/{MaxWidth}/{MaxHeight}/{PercentPlayed}/{UnPlayedCount} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Height KeepAnimation Quality Width
+/Items/{Id}/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /Items/{Id}/MakePrivate
 /Items/{Id}/MakePublic
-/Items/{Id}/PlaybackInfo
-/Items/{Id}/Refresh
-/Items/{Id}/RemoteImages
-/Items/{Id}/RemoteImages/Download
+/Items/{Id}/PlaybackInfo UserId
+/Items/{Id}/Refresh ImageRefreshMode MetadataRefreshMode Recursive ReplaceAllImages ReplaceAllMetadata
+/Items/{Id}/RemoteImages EnableSeriesImages IncludeAllLanguages Limit ProviderName StartIndex Type
+/Items/{Id}/RemoteImages/Download ImageUrl ProviderName Type
 /Items/{Id}/RemoteImages/Providers
-/Items/{Id}/RemoteSearch/Subtitles/{Language}
-/Items/{Id}/RemoteSearch/Subtitles/{SubtitleId}
-/Items/{Id}/Similar
-/Items/{Id}/Subtitles/{Index}
-/Items/{Id}/Subtitles/{Index}/Delete
+/Items/{Id}/RemoteSearch/Subtitles/{Language} IsForced IsHearingImpaired IsPerfectMatch MediaSourceId
+/Items/{Id}/RemoteSearch/Subtitles/{SubtitleId} MediaSourceId
+/Items/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Items/{Id}/Subtitles/{Index} MediaSourceId
+/Items/{Id}/Subtitles/{Index}/Delete MediaSourceId
 /Items/{Id}/Tags/Add
 /Items/{Id}/Tags/Delete
-/Items/{Id}/ThemeMedia
-/Items/{Id}/ThemeSongs
-/Items/{Id}/ThemeVideos
-/Items/{Id}/ThumbnailSet
-/Items/{Id}/{MediaSourceId}/Subtitles/{Index}/Stream.{Format}
-/Items/{Id}/{MediaSourceId}/Subtitles/{Index}/{StartPositionTicks}/Stream.{Format}
+/Items/{Id}/ThemeMedia AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes InheritFromParent Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Items/{Id}/ThemeSongs AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes InheritFromParent Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Items/{Id}/ThemeVideos AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes InheritFromParent Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Items/{Id}/ThumbnailSet Width
+/Items/{Id}/{MediaSourceId}/Subtitles/{Index}/Stream.{Format} CopyTimestamps EndPositionTicks StartPositionTicks
+/Items/{Id}/{MediaSourceId}/Subtitles/{Index}/{StartPositionTicks}/Stream.{Format} CopyTimestamps EndPositionTicks
 /Items/{ItemId}
 /Items/{ItemId}/MetadataEditor
 /Libraries/AvailableOptions
 /Library/Media/Updated
-/Library/MediaFolders
+/Library/MediaFolders IsHidden
 /Library/Movies/Added
 /Library/Movies/Updated
 /Library/PhysicalPaths
@@ -166,26 +166,26 @@
 /Library/VirtualFolders/Paths
 /Library/VirtualFolders/Paths/Delete
 /Library/VirtualFolders/Paths/Update
-/Library/VirtualFolders/Query
-/LiveStreams/Close
-/LiveStreams/MediaInfo
+/Library/VirtualFolders/Query Limit StartIndex
+/LiveStreams/Close LiveStreamId PlaySessionId
+/LiveStreams/MediaInfo LiveStreamId
 /LiveStreams/Open
 /LiveTv/AvailableRecordingOptions
-/LiveTv/ChannelMappingOptions
-/LiveTv/ChannelMappings
-/LiveTv/ChannelTags
-/LiveTv/ChannelTags/Prefixes
-/LiveTv/Channels
-/LiveTv/Channels/{Id}
-/LiveTv/EPG
+/LiveTv/ChannelMappingOptions ProviderId
+/LiveTv/ChannelMappings ProviderId
+/LiveTv/ChannelTags AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/LiveTv/ChannelTags/Prefixes AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/LiveTv/Channels AddCurrentProgram AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableFavoriteSorting EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsDisliked IsFavorite IsFolder IsHD IsKids IsLiked IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags Type UserId VideoCodecs VideoTypes Years
+/LiveTv/Channels/{Id} UserId
+/LiveTv/EPG AddCurrentProgram AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts ChannelIds Containers EnableFavoriteSorting EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsDisliked IsFavorite IsFolder IsHD IsKids IsLiked IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags Type UserId VideoCodecs VideoTypes Years
 /LiveTv/Folder
 /LiveTv/GuideInfo
 /LiveTv/Info
-/LiveTv/ListingProviders
+/LiveTv/ListingProviders ChannelId Id
 /LiveTv/ListingProviders/Available
 /LiveTv/ListingProviders/Default
-/LiveTv/ListingProviders/Delete
-/LiveTv/ListingProviders/Lineups
+/LiveTv/ListingProviders/Delete Id
+/LiveTv/ListingProviders/Lineups Country Id Location Type
 /LiveTv/LiveRecordings/{Id}/hls/live.m3u8
 /LiveTv/LiveRecordings/{Id}/hls/master.m3u8
 /LiveTv/LiveRecordings/{Id}/hls/{Segment}
@@ -194,28 +194,28 @@
 /LiveTv/LiveStreamFiles/{Id}/hls/master.m3u8
 /LiveTv/LiveStreamFiles/{Id}/hls/{Segment}
 /LiveTv/LiveStreamFiles/{Id}/stream.{Container}
-/LiveTv/Manage/Channels
+/LiveTv/Manage/Channels Limit SortBy SortOrder StartIndex
 /LiveTv/Manage/Channels/{Id}/Disabled
 /LiveTv/Manage/Channels/{Id}/SortIndex
-/LiveTv/Programs
-/LiveTv/Programs/Recommended
+/LiveTv/Programs AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts ChannelIds Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/LiveTv/Programs/Recommended AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /LiveTv/Programs/{Id}
-/LiveTv/Recordings
-/LiveTv/Recordings/Folders
+/LiveTv/Recordings AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts ChannelId Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsInProgress IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SeriesTimerId SortBy SortOrder StartIndex StartItemId Status StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/LiveTv/Recordings/Folders AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /LiveTv/Recordings/Groups
 /LiveTv/Recordings/Series
-/LiveTv/Recordings/{Id}
+/LiveTv/Recordings/{Id} UserId
 /LiveTv/Recordings/{Id}/Delete
-/LiveTv/SeriesTimers
+/LiveTv/SeriesTimers Limit SortBy SortOrder StartIndex
 /LiveTv/SeriesTimers/{Id}
 /LiveTv/SeriesTimers/{Id}/Delete
-/LiveTv/Timers
-/LiveTv/Timers/Defaults
+/LiveTv/Timers ChannelId SeriesTimerId
+/LiveTv/Timers/Defaults ProgramId
 /LiveTv/Timers/{Id}
 /LiveTv/Timers/{Id}/Delete
-/LiveTv/TunerHosts
+/LiveTv/TunerHosts Id
 /LiveTv/TunerHosts/Default/{Type}
-/LiveTv/TunerHosts/Delete
+/LiveTv/TunerHosts/Delete Id
 /LiveTv/TunerHosts/Types
 /LiveTv/Tuners/Discover
 /LiveTv/Tuners/Discvover
@@ -224,41 +224,41 @@
 /Localization/Cultures
 /Localization/Options
 /Localization/ParentalRatings
-/Movies/Recommendations
-/Movies/{Id}/Similar
-/MusicGenres
-/MusicGenres/InstantMix
-/MusicGenres/{Name}
-/MusicGenres/{Name}/Images/{Type}
-/MusicGenres/{Name}/Images/{Type}/{Index}
-/MusicGenres/{Name}/InstantMix
-/Notifications/Admin
+/Movies/Recommendations CategoryLimit EnableImages EnableImageTypes EnableUserData ImageTypeLimit ItemLimit ParentId UserId
+/Movies/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/MusicGenres AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/MusicGenres/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/MusicGenres/{Name} UserId
+/MusicGenres/{Name}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/MusicGenres/{Name}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/MusicGenres/{Name}/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Notifications/Admin Description ImageUrl Level Name Url
 /Notifications/Services/Defaults
 /Notifications/Services/Test
 /Notifications/Types
-/OfficialRatings
-/Packages
-/Packages/Installed/{Name}
+/OfficialRatings AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Packages IsAdult IsPremium PackageType TargetSystems
+/Packages/Installed/{Name} AssemblyGuid UpdateClass Version
 /Packages/Installing/{Id}
 /Packages/Installing/{Id}/Delete
-/Packages/Updates
-/Packages/{Name}
+/Packages/Updates PackageType
+/Packages/{Name} AssemblyGuid
 /Parties
 /Parties/Info
 /Parties/Leave
 /Parties/Messages
 /Parties/{Id}/Join
-/Persons
+/Persons AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /Persons/{Id}/Credits
-/Persons/{Name}
-/Persons/{Name}/Images/{Type}
-/Persons/{Name}/Images/{Type}/{Index}
-/Playback/BitrateTest
-/Playlists
-/Playlists/{Id}/AddToPlaylistInfo
-/Playlists/{Id}/InstantMix
-/Playlists/{Id}/Items
-/Playlists/{Id}/Items/Delete
+/Persons/{Name} UserId
+/Persons/{Name}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Persons/{Name}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Playback/BitrateTest Size
+/Playlists Ids MediaType Name
+/Playlists/{Id}/AddToPlaylistInfo Ids UserId
+/Playlists/{Id}/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Playlists/{Id}/Items EnableImages EnableImageTypes EnableUserData EntryIds Fields Ids ImageTypeLimit Limit StartIndex UserId
+/Playlists/{Id}/Items/Delete EntryIds
 /Playlists/{Id}/Items/{ItemId}/Move/{NewIndex}
 /Plugins
 /Plugins/{Id}
@@ -266,48 +266,48 @@
 /Plugins/{Id}/Delete
 /Plugins/{Id}/Thumb
 /Providers/Subtitles/Subtitles/{Id}
-/ScheduledTasks
+/ScheduledTasks IsEnabled IsHidden
 /ScheduledTasks/Running/{Id}
 /ScheduledTasks/Running/{Id}/Delete
 /ScheduledTasks/{Id}
 /ScheduledTasks/{Id}/Triggers
-/Sessions
-/Sessions/Capabilities
-/Sessions/Capabilities/Full
+/Sessions ControllableByUserId DeviceId Id
+/Sessions/Capabilities Id PlayableMediaTypes SupportedCommands SupportsMediaControl SupportsSync
+/Sessions/Capabilities/Full Id
 /Sessions/Logout
-/Sessions/PlayQueue
+/Sessions/PlayQueue DeviceId Id
 /Sessions/Playing
-/Sessions/Playing/Ping
+/Sessions/Playing/Ping PlaySessionId
 /Sessions/Playing/Progress
 /Sessions/Playing/Stopped
 /Sessions/{Id}/Command
 /Sessions/{Id}/Command/{Command}
-/Sessions/{Id}/Message
-/Sessions/{Id}/Playing
+/Sessions/{Id}/Message Header Text TimeoutMs
+/Sessions/{Id}/Playing ItemIds PlayCommand StartPositionTicks
 /Sessions/{Id}/Playing/{Command}
 /Sessions/{Id}/System/{Command}
 /Sessions/{Id}/Users/{UserId}
 /Sessions/{Id}/Users/{UserId}/Delete
-/Sessions/{Id}/Viewing
-/Shows/Missing
-/Shows/NextUp
-/Shows/Upcoming
-/Shows/{Id}/Episodes
-/Shows/{Id}/Seasons
-/Shows/{Id}/Similar
-/Songs/{Id}/InstantMix
-/StreamLanguages
-/Studios
-/Studios/{Name}
-/Studios/{Name}/Images/{Type}
-/Studios/{Name}/Images/{Type}/{Index}
-/SubtitleCodecs
-/Sync/Data
-/Sync/Items/Cancel
-/Sync/Items/Ready
-/Sync/JobItems
+/Sessions/{Id}/Viewing ItemId ItemName ItemType
+/Shows/Missing AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Shows/NextUp EnableImages EnableImageTypes EnableUserData Fields ImageTypeLimit Limit ParentId SeriesId StartIndex UserId
+/Shows/Upcoming AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Shows/{Id}/Episodes AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm Season SeasonId SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Shows/{Id}/Seasons AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Shows/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Songs/{Id}/InstantMix AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/StreamLanguages AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Studios AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Studios/{Name} UserId
+/Studios/{Name}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Studios/{Name}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/SubtitleCodecs AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Sync/Data TargetId
+/Sync/Items/Cancel ItemIds
+/Sync/Items/Ready TargetId
+/Sync/JobItems TargetId
 /Sync/JobItems/{Id}
-/Sync/JobItems/{Id}/AdditionalFiles
+/Sync/JobItems/{Id}/AdditionalFiles Name
 /Sync/JobItems/{Id}/Delete
 /Sync/JobItems/{Id}/Enable
 /Sync/JobItems/{Id}/File
@@ -318,20 +318,20 @@
 /Sync/Jobs/{Id}
 /Sync/Jobs/{Id}/Delete
 /Sync/OfflineActions
-/Sync/Options
-/Sync/Targets
+/Sync/Options Category ItemIds ParentId TargetId UserId
+/Sync/Targets UserId
 /Sync/{ItemId}/Status
-/Sync/{TargetId}/Items
-/Sync/{TargetId}/Items/Delete
-/System/ActivityLog/Entries
+/Sync/{TargetId}/Items ItemIds
+/Sync/{TargetId}/Items/Delete ItemIds
+/System/ActivityLog/Entries Limit MinDate StartIndex
 /System/Configuration
 /System/Configuration/Partial
 /System/Configuration/{Key}
 /System/Endpoint
 /System/Info
 /System/Info/Public
-/System/Logs/Query
-/System/Logs/{Name}
+/System/Logs/Query Limit StartIndex
+/System/Logs/{Name} Sanitize
 /System/Logs/{Name}/Lines
 /System/Ping
 /System/ReleaseNotes
@@ -339,32 +339,32 @@
 /System/Restart
 /System/Shutdown
 /System/WakeOnLanInfo
-/Tags
-/Trailers
-/Trailers/{Id}/Similar
+/Tags AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Trailers AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Trailers/{Id}/Similar AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /UI/Command
-/UI/View
+/UI/View ClientLocale PageId
 /UserSettings/{UserId}
 /UserSettings/{UserId}/Partial
 /Users/AuthenticateByName
 /Users/CopyDataOptions
 /Users/ForgotPassword
 /Users/ForgotPassword/Pin
-/Users/ItemAccess
+/Users/ItemAccess IsDisabled IsHidden Limit NameStartsWithOrGreater SortOrder StartIndex
 /Users/New
-/Users/Prefixes
+/Users/Prefixes IsDisabled IsHidden Limit NameStartsWithOrGreater SortOrder StartIndex
 /Users/Public
-/Users/Query
+/Users/Query IsDisabled IsHidden Limit NameStartsWithOrGreater SortOrder StartIndex
 /Users/{Id}
 /Users/{Id}/Authenticate
 /Users/{Id}/Configuration
 /Users/{Id}/Configuration/Partial
-/Users/{Id}/Connect/Link
+/Users/{Id}/Connect/Link ConnectUsername
 /Users/{Id}/Connect/Link/Delete
 /Users/{Id}/Delete
-/Users/{Id}/Images/{Type}
-/Users/{Id}/Images/{Type}/Delete
-/Users/{Id}/Images/{Type}/{Index}
+/Users/{Id}/Images/{Type} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height Index KeepAnimation MaxHeight MaxWidth Quality Tag Width
+/Users/{Id}/Images/{Type}/Delete Index
+/Users/{Id}/Images/{Type}/{Index} AutoOrient BackgroundColor CropWhitespace EnableImageEnhancers ForegroundLayer Format Height KeepAnimation MaxHeight MaxWidth Quality Tag Width
 /Users/{Id}/Images/{Type}/{Index}/Delete
 /Users/{Id}/Password
 /Users/{Id}/Policy
@@ -378,52 +378,52 @@
 /Users/{UserId}/HomeSections
 /Users/{UserId}/HomeSections/Delete
 /Users/{UserId}/HomeSections/Move
-/Users/{UserId}/Items
-/Users/{UserId}/Items/Latest
-/Users/{UserId}/Items/Resume
+/Users/{UserId}/Items AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags VideoCodecs VideoTypes Years
+/Users/{UserId}/Items/Latest EnableImages EnableImageTypes EnableUserData Fields GroupItems ImageTypeLimit IncludeItemTypes IsFolder IsPlayed Limit MediaTypes ParentId
+/Users/{UserId}/Items/Resume AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags VideoCodecs VideoTypes Years
 /Users/{UserId}/Items/Root
 /Users/{UserId}/Items/{Id}
-/Users/{UserId}/Items/{Id}/HideFromResume
-/Users/{UserId}/Items/{Id}/Intros
-/Users/{UserId}/Items/{Id}/LocalTrailers
-/Users/{UserId}/Items/{Id}/Rating
+/Users/{UserId}/Items/{Id}/HideFromResume Hide
+/Users/{UserId}/Items/{Id}/Intros EnableImages EnableImageTypes EnableUserData Fields ImageTypeLimit
+/Users/{UserId}/Items/{Id}/LocalTrailers EnableImages EnableImageTypes EnableUserData Fields ImageTypeLimit
+/Users/{UserId}/Items/{Id}/Rating Likes
 /Users/{UserId}/Items/{Id}/Rating/Delete
-/Users/{UserId}/Items/{Id}/SpecialFeatures
+/Users/{UserId}/Items/{Id}/SpecialFeatures EnableImages EnableImageTypes EnableUserData Fields ImageTypeLimit
 /Users/{UserId}/Items/{ItemId}/UserData
-/Users/{UserId}/PlayedItems/{Id}
+/Users/{UserId}/PlayedItems/{Id} DatePlayed
 /Users/{UserId}/PlayedItems/{Id}/Delete
-/Users/{UserId}/PlayingItems/{Id}
-/Users/{UserId}/PlayingItems/{Id}/Delete
-/Users/{UserId}/PlayingItems/{Id}/Progress
+/Users/{UserId}/PlayingItems/{Id} AudioStreamIndex CanSeek LiveStreamId MediaSourceId NextMediaType PlayMethod PlaySessionId PositionTicks SubtitleStreamIndex
+/Users/{UserId}/PlayingItems/{Id}/Delete LiveStreamId MediaSourceId NextMediaType PlaySessionId PositionTicks
+/Users/{UserId}/PlayingItems/{Id}/Progress AudioStreamIndex IsMuted IsPaused LiveStreamId MediaSourceId PlaybackRate PlayMethod PlaySessionId PositionTicks RepeatMode SubtitleOffset SubtitleStreamIndex VolumeLevel
 /Users/{UserId}/SearchedItems/
-/Users/{UserId}/Sections/{SectionId}/Items
-/Users/{UserId}/Suggestions
+/Users/{UserId}/Sections/{SectionId}/Items AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags VideoCodecs VideoTypes Years
+/Users/{UserId}/Suggestions AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags VideoCodecs VideoTypes Years
 /Users/{UserId}/TypedSettings/{Key}
-/Users/{UserId}/Views
-/VideoCodecs
-/Videos/ActiveEncodings
-/Videos/ActiveEncodings/Delete
-/Videos/MergeVersions
-/Videos/{Id}/AdditionalParts
+/Users/{UserId}/Views IncludeExternalContent
+/VideoCodecs AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
+/Videos/ActiveEncodings DeviceId PlaySessionId
+/Videos/ActiveEncodings/Delete DeviceId PlaySessionId
+/Videos/MergeVersions Ids
+/Videos/{Id}/AdditionalParts EnableImages EnableImageTypes EnableUserData Fields ImageTypeLimit UserId
 /Videos/{Id}/AlternateSources
 /Videos/{Id}/AlternateSources/Delete
-/Videos/{Id}/Subtitles/{Index}
-/Videos/{Id}/Subtitles/{Index}/Delete
+/Videos/{Id}/Subtitles/{Index} MediaSourceId
+/Videos/{Id}/Subtitles/{Index}/Delete MediaSourceId
 /Videos/{Id}/hls/{PlaylistId}/{SegmentId}.{SegmentContainer}
 /Videos/{Id}/hls1/{PlaylistId}/{SegmentId}.{SegmentContainer}
-/Videos/{Id}/index.bif
-/Videos/{Id}/live.m3u8
-/Videos/{Id}/live_subtitles.m3u8
-/Videos/{Id}/main.m3u8
-/Videos/{Id}/master.m3u8
-/Videos/{Id}/stream
-/Videos/{Id}/stream.{Container}
-/Videos/{Id}/subtitles.m3u8
+/Videos/{Id}/index.bif Width
+/Videos/{Id}/live.m3u8 AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Videos/{Id}/live_subtitles.m3u8 ManifestSubtitles SubtitleSegmentLength
+/Videos/{Id}/main.m3u8 AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Videos/{Id}/master.m3u8 AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Videos/{Id}/stream AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Videos/{Id}/stream.{Container} AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Videos/{Id}/subtitles.m3u8 ManifestSubtitles SubtitleSegmentLength
 /Videos/{Id}/{MediaSourceId}/Attachments/{Index}/Stream
-/Videos/{Id}/{MediaSourceId}/Subtitles/{Index}/Stream.{Format}
-/Videos/{Id}/{MediaSourceId}/Subtitles/{Index}/{StartPositionTicks}/Stream.{Format}
-/Videos/{Id}/{StreamFileName}
-/Years
+/Videos/{Id}/{MediaSourceId}/Subtitles/{Index}/Stream.{Format} CopyTimestamps EndPositionTicks StartPositionTicks
+/Videos/{Id}/{MediaSourceId}/Subtitles/{Index}/{StartPositionTicks}/Stream.{Format} CopyTimestamps EndPositionTicks
+/Videos/{Id}/{StreamFileName} AudioBitRate AudioChannels AudioCodec AudioSampleRate AudioStreamIndex Container CopyTimestamps DeviceId DeviceProfileId EnableAutoStreamCopy Height MaxAudioChannels MaxHeight MaxVideoBitDepth MaxWidth StartTimeTicks Static SubtitleMethod SubtitleStreamIndex VideoBitRate VideoCodec VideoStreamIndex Width
+/Years AdjacentTo AiredDuringSeason AlbumArtistStartsWithOrGreater Albums AnyProviderIdEquals ArtistIds Artists ArtistStartsWithOrGreater ArtistType AudioCodecs AudioLayouts Containers EnableImages EnableImageTypes EnableUserData ExcludeItemIds ExcludeItemTypes ExcludeTags ExtendedVideoTypes Fields Filters Genres GroupItemsIntoCollections HasImdbId HasOfficialRating HasOverview HasParentalRating HasSpecialFeature HasSubtitles HasThemeSong HasThemeVideo HasTmdbId HasTrailer HasTvdbId Ids ImageTypeLimit ImageTypes IncludeItemTypes Is3D IsFavorite IsFolder IsHD IsKids IsLocked IsMovie IsNew IsNewOrPremiere IsNews IsPlaceHolder IsPlayed IsPremiere IsRepeat IsSeries IsSpecialSeason IsSports IsUnaired Limit MaxEndDate MaxOfficialRating MaxPlayers MaxPremiereDate MaxStartDate MediaTypes MinCommunityRating MinCriticRating MinDateLastSaved MinDateLastSavedForUser MinEndDate MinIndexNumber MinOfficialRating MinPlayers MinPremiereDate MinStartDate NameLessThan NameStartsWith NameStartsWithOrGreater OfficialRatings ParentId ParentIndexNumber Path Person PersonIds PersonTypes ProjectToMedia Recursive SearchTerm SeriesStatus SortBy SortOrder StartIndex StartItemId StudioIds Studios SubtitleCodecs Tags UserId VideoCodecs VideoTypes Years
 /openapi
 /openapi.json
 /swagger

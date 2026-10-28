@@ -22,7 +22,8 @@ import (
 
 // The fake upstream mirrors the Emby-compatible server this plugin was first
 // deployed against (observed 2026-10): 26-character mixed-case ids, a short
-// ServerId, Ids and played filters ignored, streams under /play/video, no
+// ServerId, Ids and played filters ignored, query parameters honoured only in
+// Emby's spelling, streams under /play/video, no
 // /UserSettings, no WebSocket, display preferences only for usersettings, and
 // subtitle streams that redirect to the original file under /play/subtitle
 // with an HTML body repeating the link.
@@ -75,8 +76,9 @@ var catalog = map[string]map[string]any{
 }
 
 var libraries = map[string][]string{
-	"c01SHOWS": {"m01SERIES"},
-	"c01FILMS": {"m01MOVIE"},
+	"c01SHOWS":  {"m01SERIES"},
+	"c01FILMS":  {"m01MOVIE"},
+	"m01SERIES": {"s01SEASON"},
 }
 
 func episodeFixture(id string, n int) map[string]any {
@@ -206,6 +208,9 @@ func (f *fakeUpstream) serve(w http.ResponseWriter, r *http.Request) {
 		ids := []string{"m01SERIES", "m01MOVIE"}
 		if p := r.URL.Query().Get("ParentId"); p != "" {
 			ids = libraries[p]
+			if p == "m01SERIES" && r.URL.Query().Get("Recursive") == "true" {
+				ids = []string{"e01EP1", "e01EP2", "e01EP3"}
+			}
 		}
 		items := []any{}
 		for _, id := range ids {

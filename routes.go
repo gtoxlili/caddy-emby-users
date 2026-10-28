@@ -8,11 +8,16 @@ import (
 	"strings"
 )
 
-// Emby matches API paths case-insensitively, and some clients send them
-// lowercased (Emby for Android TV asks for /emby/system/info/public). A proxy
-// in front of the upstream may accept only the official spelling, so every
-// forwarded path is respelled along the API's own templates. Parameters keep
-// their exact text; paths that match no template are left alone.
+// Emby matches API paths and query parameter names case-insensitively, and
+// some clients send them lowercased (Emby for Android TV asks for
+// /emby/system/info/public and plays a series with recursive=true). A proxy in
+// front of the upstream may accept only the official spelling: it answers 404
+// for a misspelled path and ignores a misspelled query parameter, so playing a
+// series gets its seasons instead of its episodes. Every forwarded path is
+// respelled along the API's own templates, and the query parameters a template
+// documents along with it. Path parameters and query values keep their exact
+// text; paths that match no template and parameters a template does not
+// document are left alone.
 
 //go:embed routes.txt
 var routesTxt string
@@ -25,6 +30,7 @@ type route struct {
 	re       *regexp.Regexp // case-insensitive, one group per parameter
 	pieces   []string       // literal text in official spelling; "" stands for a parameter
 	literals int
+	query    map[string]string // query parameter names, lowercased → official spelling
 }
 
 var templateParam = regexp.MustCompile(`\{[^}]+\}`)
@@ -32,11 +38,15 @@ var templateParam = regexp.MustCompile(`\{[^}]+\}`)
 func compileRoutes(txt string) routeTable {
 	t := routeTable{}
 	for _, line := range strings.Split(txt, "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
+		fields := strings.Fields(line)
+		if len(fields) == 0 || strings.HasPrefix(fields[0], "#") {
 			continue
 		}
-		r := &route{}
+		line = fields[0]
+		r := &route{query: map[string]string{}}
+		for _, name := range fields[1:] {
+			r.query[strings.ToLower(name)] = name
+		}
 		var pat strings.Builder
 		pat.WriteString(`(?i)^`)
 		literal := func(s string) {
@@ -73,8 +83,9 @@ func firstSegment(p string) string {
 	return strings.ToLower(p)
 }
 
-// spell returns p, an escaped API path without prefix, in official spelling.
-func (t routeTable) spell(p string) (string, bool) {
+// spell returns p, an escaped API path without prefix, in official spelling,
+// and the template it matched.
+func (t routeTable) spell(p string) (string, *route) {
 	for _, r := range t[firstSegment(p)] {
 		sub := r.re.FindStringSubmatch(p)
 		if sub == nil {
@@ -89,20 +100,44 @@ func (t routeTable) spell(p string) (string, bool) {
 			}
 			b.WriteString(piece)
 		}
-		return b.String(), true
+		return b.String(), r
 	}
-	return "", false
+	return "", nil
+}
+
+// spellQuery respells the names in raw, an encoded query string, that r
+// documents. Values and every other pair keep their exact encoding.
+func (r *route) spellQuery(raw string) string {
+	if raw == "" {
+		return raw
+	}
+	parts := strings.Split(raw, "&")
+	for i, p := range parts {
+		k, v, hasValue := strings.Cut(p, "=")
+		dk, err := url.QueryUnescape(k)
+		if err != nil {
+			continue
+		}
+		if name, ok := r.query[strings.ToLower(dk)]; ok && name != dk {
+			parts[i] = url.QueryEscape(name)
+			if hasValue {
+				parts[i] += "=" + v
+			}
+		}
+	}
+	return strings.Join(parts, "&")
 }
 
 // canonicalize respells u's path as /emby plus the official template
-// spelling, whatever prefix the client used.
+// spelling, whatever prefix the client used, and the query parameter names
+// the template documents.
 func canonicalize(u *url.URL) {
 	segs := strings.FieldsFunc(u.EscapedPath(), func(r rune) bool { return r == '/' })
 	for len(segs) > 0 && (strings.EqualFold(segs[0], "emby") || strings.EqualFold(segs[0], "mediabrowser")) {
 		segs = segs[1:]
 	}
-	spelled, ok := apiRoutes.spell("/" + strings.Join(segs, "/"))
-	if !ok {
+	spelled, r := apiRoutes.spell("/" + strings.Join(segs, "/"))
+	if r == nil {
 		return
 	}
 	escaped := "/emby" + spelled
@@ -111,4 +146,5 @@ func canonicalize(u *url.URL) {
 		return
 	}
 	u.Path, u.RawPath = p, escaped
+	u.RawQuery = r.spellQuery(u.RawQuery)
 }

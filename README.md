@@ -59,10 +59,11 @@ access token is stored in the database.
 Clients see a complete Emby server even when the upstream sits behind a proxy that
 accepts only part of the API, as some hosted services do:
 
-- Forwarded paths take the official spelling of Emby's API templates; parameters keep
-  their text. Emby matches paths case-insensitively and some clients send them
-  lowercased. The templates in `routes.txt` come from the official SDK's OpenAPI
-  document (`scripts/gen_routes.py`).
+- Forwarded paths take the official spelling of Emby's API templates, and so do the
+  names of the query parameters each template documents; path parameters and query
+  values keep their text. Emby matches both case-insensitively and some clients send
+  them lowercased. The templates and their parameters in `routes.txt` come from the
+  official SDK's OpenAPI document (`scripts/gen_routes.py`).
 - Reads that clients load without error handling answer empty when the upstream refuses
   them: the language list (Emby's ISO 639-2 table in `cultures.json`,
   `scripts/gen_cultures.py`), special features, local trailers, home section items and

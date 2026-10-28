@@ -38,6 +38,25 @@ func TestForwardedPathsUseOfficialSpelling(t *testing.T) {
 	}
 }
 
+// repro: 2026-10-28, Emby for Android TV said it could not play a series: it
+// asks for the series' videos with recursive=true, the observed upstream
+// ignores a query parameter spelled otherwise than in Emby's API and answers
+// the season, and PlaybackInfo of a season has no sources. Parameters the
+// route does not document keep their text.
+func TestForwardedQueryParametersUseOfficialSpelling(t *testing.T) {
+	h := newHarness(t)
+	alice := h.signIn("alice")
+	r := h.as(alice.Token, "GET", "/emby/Users/"+alice.UserID+
+		"/Items?MediaTypes=Video%2CPhoto&recursive=true&ParentId=m01SERIES&format=json", "")
+	if got := itemIDs(t, r); !reflect.DeepEqual(got, []string{"e01EP1", "e01EP2", "e01EP3"}) {
+		t.Fatalf("playing the series got %v", got)
+	}
+	req := h.up.seen()
+	if q := req[len(req)-1].Query; q != "MediaTypes=Video%2CPhoto&Recursive=true&ParentId=m01SERIES&format=json" {
+		t.Fatalf("query reached the upstream as %s", q)
+	}
+}
+
 // invariant: the upstream token never reaches a client. The observed
 // upstream redirects with an HTML body that repeats the Location, token
 // included.
